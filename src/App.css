@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+/* .custom-scrollbar-thumb, .custom-scrollbar
+.Scrollbar {
+  scrollbar-color: black;
+  overflow-y: scroll;
+} */
+.custom-scrollbar {
+  display: block;
+  /* width: 10em; */
+  overflow-y: scroll;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 14px;
+  height: 4px;
+  background-color: black; /* or add it to the track */
+}
+
+/* .custom-scrollbar::-webkit-scrollbar-track {
+  border-width: 4px;
+  background: yellow;
+  border: 4px solid red;
+} */
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  width: 5px;
+  border-radius: 6px;
+  background: #aaa;
+  max-height: 10px;
+  padding: 2px;
+  background-clip: padding-box;
+  border-right:3px solid transparent;
+  border-left:3px solid transparent;
+}
