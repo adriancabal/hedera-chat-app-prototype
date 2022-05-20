@@ -6,13 +6,11 @@ export const sendDataTopicMessage = async (client: Client, dataMessage: string) 
     let sendResponse = await new TopicMessageSubmitTransaction({
         topicId: DATA_TOPIC_ID,
         message: dataMessage,
-    })
-    // set max chunks let you increase the amount of characters you can send in one message. 1 chunk = 1000 chars. Defualt limit is 20 chunks = 20k chars.
-    // .setMaxChunks(100)
-    .execute(client);
+    }).execute(client);
 
     const getReceipt = await sendResponse.getReceipt(client);
-    return getReceipt.status === 22 ;
+    console.log("receiptStatus: ", getReceipt.status);
+    return getReceipt.status._code === 22 ;
     // console.log("The message transaction status: " + transactionStatus)
 }
 

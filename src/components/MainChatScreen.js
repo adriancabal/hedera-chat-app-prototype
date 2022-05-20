@@ -1,47 +1,73 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from "../redux/userSlice";
+import SideBar from './SideBar';
 import '../App.css';
-import { ContractCallQuery, ContractExecuteTransaction, ContractFunctionParameters, Hbar } from "@hashgraph/sdk";
-// import SearchIcon from '@mui/icons-material/Search';
-const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
+import { Client, TopicMessageSubmitTransaction} from "@hashgraph/sdk";
+import { logoutUser } from '../helper/MessageMaker';
+import { sendDataTopicMessage } from '../helper/topicMessageSender';
 
-const mockUsers = ["user1", "user2", "user3", "user4", "user5", "user6", "user7", "user8", "user9", "user10", "user11", "user12", "user13", "user14", "user15", "user16", "user17", "user18", "user19", "user20", "user21", "user22", "user23", , "user24", "user25", "user26", "user27"];
+// const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
 
 const MainChatScreen = (props) => {
-    const hederaContractId = useSelector((state) => state.user.smartContractId);
-    const user = useSelector((state) => state.user.currentUser);
+    const dispatch = useDispatch();
+    const currentUser = useSelector((state) => state.user.currentUser);
+    const hederaClient = useSelector((state) => state.user.hederaClient);
 
-    const chatScreenColor = "bg-[purple]";
+    const onClickLogout = async () => {
+        // const logoutSuccessful = sendDataTopicMessage(hederaClient,logoutUser(currentUser));
+        let sendResponse = await new TopicMessageSubmitTransaction({
+            topicId: "0.0.34717180",
+            message: logoutUser(currentUser),
+        })
+        .execute(hederaClient);
+        const getReceipt = await sendResponse.getReceipt(hederaClient);
+        console.log("receiptStatus: " + getReceipt.status);
+        const logoutSuccessful = getReceipt.status._code === 22 ;
+        // console.log("logoutSuccessful: ", logoutSuccessful);
+        if(logoutSuccessful){
+            dispatch(setUser(""));
+        }
+    }
+
+    const chatScreenColor = "bg-[#292a33]";
     return(
-        <div className={`flex flex-row ${chatScreenColor} h-full w-[1000px] rounded-xl`}>
-
-            {/* sidebar */}
-            <div className='flex-col hbg-[red] h-full w-1/5 Scrollbar custom-scrollbar' >
-                {
-                    mockUsers.map(user => 
-                        <div className='h-12 border-2 border-black bg-[blue]'>
-                            {user}
-                        </div>
-                    )
-
-                }
-                {/* <ul className='flex flex-col w-96 bg-[red] justify-content'>
-                    {
-                        mockUsers.map(user => 
-                        <li className='h-10 border-2 border-black'>{user}</li>)
-                    }
-                </ul> */}
-                
-            </div>
-
-            {/* Chat Room Window */}
-            <div className='flex flex-col bg-[#343d33] h-full w-4/5'>
-                <div className='flex w-full h-[650px] bg-transparent'>
-
+        <div className={`flex flex-col h-full w-[1000px] rounded-lg ${chatScreenColor}`}>
+           
+            <div className={`flex flex-row  h-[8%] w-[1000px] rounded-md`}>
+                {/* Logout */}
+                <div className={`flex flex-row w-1/5 justify-center`}>
+                    <button 
+                        className='text-lg font-bold text-[#f23f69] '
+                        onClick={() => {onClickLogout()}}
+                    >
+                        {"Logout"}
+                    </button>
                 </div>
 
-                <div className='flex w-full h-[80px] bg-[#5e6e5c]'>
+                {/* User online */}
+                <div className='flex flex-row w-4/5 justify-center'>
+                    <p className='text-lg text-[#3ff281] self-center'>
+                        <span className='font-bold'>{`${currentUser}`}</span>
+                        {` - is logged in`}
+                    </p>
+                </div>
+            </div>
 
+            {/* Main View */}
+            <div className={`flex flex-row  h-[92%] w-[1000px]`}>
+                {/* Scoll sidebar */}
+                <SideBar />
+
+                {/* Chat Room Window */}
+                <div className='flex flex-col bg-[#343d33] h-full w-4/5'>
+                    <div className='flex w-full h-[650px] bg-transparent'>
+
+                    </div>
+
+                    <div className='flex w-full h-[80px] bg-[#5e6e5c] rounded-xl'>
+
+                    </div>
                 </div>
             </div>
         </div>

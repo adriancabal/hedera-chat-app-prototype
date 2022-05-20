@@ -5,16 +5,18 @@ import { sendDataTopicMessage } from '../helper/topicMessageSender';
 import { UserAction } from '../constants';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ContractCallQuery, ContractExecuteTransaction, ContractFunctionParameters, Hbar, TopicMessageSubmitTransaction } from "@hashgraph/sdk";
+import { TopicMessageSubmitTransaction } from "@hashgraph/sdk";
+import { loginUser, newUser } from '../helper/MessageMaker';
+import { userMap, userList } from '../data';
 // import SearchIcon from '@mui/icons-material/Search';
-const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
+// const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
 
 
 const Login = (props) => {
     const dispatch = useDispatch();
     const hederaClient = useSelector((state) => state.user.hederaClient);
-    const userList = useSelector((state) => state.users.userList);
-    const userMap = useSelector((state) => state.users.userMap);
+    // const userList = useSelector((state) => state.users.userList);
+    // const userMap = useSelector((state) => state.users.userMap);
     const [loginType, setLoginType]= useState("login");
     const [usernameInputValue, setUsernameInputValue] = useState("");
     const [passwordInputValue, setPasswordInputValue] = useState("");
@@ -42,9 +44,8 @@ const Login = (props) => {
 
         }else if(loginType === "create"){
             //call add new user contract method
-            const isUserRegistered = await checkUsernameAvailability();
-            console.log("isUserRegistered: " + isUserRegistered);
-            if(isUserRegistered){
+            const isUsernameAvailable = await checkUsernameAvailability();
+            if(!isUsernameAvailable){
                 setErrorMessage("User already exists.")
             }else {
                 await createNewAccount();
@@ -53,108 +54,142 @@ const Login = (props) => {
     }
 
     const authenticateUserLogin = async () => {
-    //     if(userMap[usernameInputValue] && userMap[usernameInputValue].pw === passwordInputValue){
-    //         props.setLoggedIn(true);
-    //         setErrorMessage("");
-    //         dispatch(setUser(usernameInputValue));
-    //         // alert("logged in");
-    //    }else {
-    //         setErrorMessage("Invalid credentials. Try again.");
-    //     }
-    
-        const contractQuery = await new ContractCallQuery()
-            .setGas(100000)
-            .setContractId(hederaContractId)
-            .setFunction(
-                "authenticate", 
-                new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
-            )
-            .setQueryPayment(new Hbar(1));
-    
-        //Submit to a Hedera network
-        const getMessage = await contractQuery.execute(hederaClient);
-        const message = getMessage.getString(0);
-        // console.log("The contract message: authenticate? " + message);
-        // console.log("4. Balance after querying big file smartcontract: " + await getAccountBalance(myAccountId, client));
-       
-       
-        if(message === "success"){
-            //call callback to show user dashboard
-            props.setLoggedIn(true);
-            setErrorMessage("");
-            dispatch(setUser(usernameInputValue));
-            alert("logged in");
-        }else {
+        console.log("authenticateUserLogin");
+        console.log("!! : ", userMap );
+        const user = userMap[usernameInputValue];
+        console.log("user: ", user);
+        console.log("user.pw: " + user.pw +", pwinput: " + passwordInputValue );
+        if(user && user.pw === passwordInputValue){
+            console.log("here!");
+            let loginSuccessful = true;
+            console.log("authenticating log in");
+            if(!user.isLoggedIn){
+                console.log("user is not yet logged in");
+                let sendResponse = await new TopicMessageSubmitTransaction({
+                    topicId: "0.0.34717180",
+                    message: loginUser(usernameInputValue),
+                })
+                .execute(hederaClient);
+                const getReceipt = await sendResponse.getReceipt(hederaClient);
+                console.log("receiptStatus: " + getReceipt.status);
+                loginSuccessful = getReceipt.status._code === 22 ;
+            //    loginSuccessful = await sendDataTopicMessage(hederaClient, loginUser(user));
+            }
+            if(loginSuccessful) {
+                console.log("login successful");
+                dispatch(setUser(usernameInputValue));
+                setErrorMessage("");
+            }
+            // alert("logged in");
+       }else {
             setErrorMessage("Invalid credentials. Try again.");
         }
+    
+        // const contractQuery = await new ContractCallQuery()
+        //     .setGas(100000)
+        //     .setContractId(hederaContractId)
+        //     .setFunction(
+        //         "authenticate", 
+        //         new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
+        //     )
+        //     .setQueryPayment(new Hbar(1));
+    
+        // //Submit to a Hedera network
+        // const getMessage = await contractQuery.execute(hederaClient);
+        // const message = getMessage.getString(0);
+        // // console.log("The contract message: authenticate? " + message);
+        // // console.log("4. Balance after querying big file smartcontract: " + await getAccountBalance(myAccountId, client));
+       
+       
+        // if(message === "success"){
+        //     //call callback to show user dashboard
+        //     props.setLoggedIn(true);
+        //     setErrorMessage("");
+        //     dispatch(setUser(usernameInputValue));
+        //     alert("logged in");
+        // }else {
+        //     setErrorMessage("Invalid credentials. Try again.");
+        // }
     }
 
     const checkUsernameAvailability = async () => {
         console.log("checkUsernameAvailability...");
-        
-        const contractQuery = await new ContractCallQuery()
-            .setGas(100000)
-            .setContractId(hederaContractId)
-            .setFunction(
-                "isUserRegistered", 
-                new ContractFunctionParameters().addString(usernameInputValue)
-            )
-            .setQueryPayment(new Hbar(1));
-        const getMessage = await contractQuery.execute(hederaClient);
-        const isUserRegistered = getMessage.getBool(0);
-        return isUserRegistered;
+        if(userMap[usernameInputValue]){
+            return false;
+        }
+        return true;
 
-        // if(userMap[usernameInputValue]){
-        //     return false;
-        // }
-        // return true;
+        // const contractQuery = await new ContractCallQuery()
+        //     .setGas(100000)
+        //     .setContractId(hederaContractId)
+        //     .setFunction(
+        //         "isUserRegistered", 
+        //         new ContractFunctionParameters().addString(usernameInputValue)
+        //     )
+        //     .setQueryPayment(new Hbar(1));
+        // const getMessage = await contractQuery.execute(hederaClient);
+        // const isUserRegistered = getMessage.getBool(0);
+        // return isUserRegistered;
+
+        
     }
 
     const createNewAccount = async () => {
         console.log("createNewAccount...");
-        // const addUserMessage = {
-        //     type: UserAction.ADD_USER,
-        //     user: usernameInputValue,
-        //     pw: passwordInputValue,
-        // };
-        // const stringifiedNewUserMsg = JSON.stringify(addUserMessage);
-        // const isSuccess = await sendDataTopicMessage(hederaClient, stringifiedNewUserMsg);
+        console.log("userMap: ", userMap);
+        let sendResponse = await new TopicMessageSubmitTransaction({
+            topicId: "0.0.34717180",
+            message: newUser(usernameInputValue, passwordInputValue),
+        })
+        .execute(hederaClient);
+        const getReceipt = await sendResponse.getReceipt(hederaClient);
+        console.log("receiptStatus: " + getReceipt.status);
+        const createNewAccountSuccess = getReceipt.status._code === 22 ;
+        console.log("getReceiptStatusTypeOf: ", getReceipt.status);
+        // const isSuccess = await sendDataTopicMessage(hederaClient, );
+        if(createNewAccountSuccess){
+            console.log("createNewAccountSuccess!");
+            if(!userMap[usernameInputValue]){
+                console.log("new user doesn't exist in userMap");
+                // let userMapTemp = {...userMap};
+                userMap[usernameInputValue] = {
+                    pw: passwordInputValue, 
+                    channels: [],
+                    isLoggedIn: false,
+                };
+                // let userListTemp = [...userList];
+                userList.push(usernameInputValue);
+                // dispatch(setUserMap(userMapTemp));
+                // dispatch(setUserList(userListTemp));
+            }
+            console.log("finalize createNewAccountSuccess");
+            props.setNewAccountCreated(true);
+            setLoginType("login");
+            setErrorMessage("");
+        }
 
-        // if(isSuccess){
-        //     if(!userMap[usernameInputValue]){
-        //         userMap[usernameInputValue] = {
-        //             pw: passwordInputValue, 
-        //             channels: [],
-        //             isLoggedIn: false,
-        //         };
-        //         userList.push(usernameInputValue);
-        //         dispatch(setUserMap(userMap));
-        //         dispatch(setUserList(userList));
-        //     }
+        // const contractExecTx= await new ContractExecuteTransaction()
+        //     .setContractId(hederaContractId)
+        //     .setGas(100000)
+        //     .setFunction(
+        //         "addUser", 
+        //         new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
+        //     );
+        // const submitExecTx = await contractExecTx.execute(hederaClient);
+        // const receipt = await submitExecTx.getReceipt(hederaClient);
+
+        // // If receipt.status is SUCCESS, proceed to dashboard with the newly created account
+        // if(receipt.status.toString() === "SUCCESS"){
         //     props.setNewAccountCreated(true);
         //     setLoginType("login");
         // }
-
-        const contractExecTx= await new ContractExecuteTransaction()
-            .setContractId(hederaContractId)
-            .setGas(100000)
-            .setFunction(
-                "addUser", 
-                new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
-            );
-        const submitExecTx = await contractExecTx.execute(hederaClient);
-        const receipt = await submitExecTx.getReceipt(hederaClient);
-
-        // If receipt.status is SUCCESS, proceed to dashboard with the newly created account
-        if(receipt.status.toString() === "SUCCESS"){
-            props.setNewAccountCreated(true);
-            setLoginType("login");
-        }
     }
 
     const onClickBottomLink = () => {
+        console.log("onClickBottomLink-userMap: ", userMap);
         if(loginType === "login"){
             setLoginType("create");
+            props.setNewAccountCreated(false);
         }else {
             setLoginType("login");
         }

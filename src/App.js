@@ -1,30 +1,37 @@
 // import logo from './logo.svg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHederaClient, setSmartContractId } from "./redux/userSlice";
-import { setUserList, setUserMap } from "./redux/usersSlice";
-import { setDeletedChannelList, setDmChannelList, setGroupChannelList, setDmChannelMap, setGroupChannelMap } from "./redux/channelsSlice";
-import { test } from './components/TopicQuery';
+// import { setUserList, setUserMap } from "./redux/usersSlice";
+// import { setDeletedChannelList, setDmChannelList, setGroupChannelList, setDmChannelMap, setGroupChannelMap } from "./redux/channelsSlice";
 import './App.css';
 import Login from './components/Login';
 import MainChatScreen from './components/MainChatScreen';
 import { useEffect, useState } from 'react';
-import { Client, TopicMessageQuery, PrivateKey, AccountId} from "@hashgraph/sdk";
+import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import { UserAction } from './constants';
+import socketIOClient from "socket.io-client";
+import { userMap, userList, dmChannelMap, groupChannelMap, dmChannelList, groupChannelList, deletedChannelList} from './data';
+const ENDPOINT = "http://localhost:4001";
 const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
+// let outerUserMap ={};
 
 function App() {
   // const hederaClient = useSelector((state) => state.user.hederaClient);
   const dispatch = useDispatch();
-  const [isLoggedIn, setLoggedIn] = useState(false);
-  const [isNewAccountCreated, setNewAccountCreated] = useState(true);
-  const userList = useSelector((state) => state.users.userList);
-  const userMap = useSelector((state) => state.users.userMap);
-  const deletedChannelList = useSelector((state) => state.channels.deletedChannelList);
-  const dmChannelMap = useSelector((state) => state.channels.dmChannelMap);
-  const groupChannelMap = useSelector((state) => state.channels.groupChannelMap);
-  const dmChannelList = useSelector((state) => state.channels.dmChannelList);
-  const groupChannelList = useSelector((state) => state.channels.groupChannelList);
+  // const [isLoggedIn, setLoggedIn] = useState(false);
+  const [isNewAccountCreated, setNewAccountCreated] = useState(false);
+  // const [topicMsg, setTopicMsg] = useState("init");
+  // const [appUserList, setAppUserList] = useState([]);
+
+  const currentUser = useSelector((state) => state.user.currentUser);
+  // const userList = useSelector((state) => state.users.userList);
+  // const userMap = useSelector((state) => state.users.userMap);
+  // const deletedChannelList = useSelector((state) => state.channels.deletedChannelList);
+  // const dmChannelMap = useSelector((state) => state.channels.dmChannelMap);
+  // const groupChannelMap = useSelector((state) => state.channels.groupChannelMap);
+  // const dmChannelList = useSelector((state) => state.channels.dmChannelList);
+  // const groupChannelList = useSelector((state) => state.channels.groupChannelList);
   const hederaClient = useSelector((state) => state.user.hederaClient);
 
   useEffect(() => {
@@ -46,36 +53,39 @@ function App() {
     client = Client.forTestnet();
     client.setOperator(AccountId.fromString(myAccountId) ,PrivateKey.fromString(myPrivateKey));
     // console.log("client: ", client._mirrorNetwork);
-    // dispatch(setHederaClient(client));
+    dispatch(setHederaClient(client));
     // dispatch(setSmartContractId(hederaContractId));
-    // initializeDataTopicConnection()
 
     console.log("initializingDataTopicConnection...");
-    // try {
-    //   new TopicMessageQuery()
-    //     .setTopicId("0.0.34717180")
-    //         // 'May 7, 2022 10:15:30'
-    //     .setStartTime(new Date('May 18, 2022 13:50:30'))
-    //     .subscribe(client, null, (message) => {
-    //       let messageAsString = Buffer.from(message.contents, "utf8").toString();
-    //       // dataController(messageAsString);
-          
-    //       console.log(`${message.consensusTimestamp.toDate()} Received: ${messageAsString}`);
-    //   });
-    // }
-    // catch(err){
-    //     console.log("err!: ", err);
-    // }
+    const socket = socketIOClient(ENDPOINT, 
+      {
+      withCredentials: true, 
+      extraHeaders: {
+        "hedera-chat-app": "abcd",
+        // 'Access-Control-Allow-Credentials': true,
+      }
+    }
+    );
+
+    // const socket = socketIOClient(ENDPOINT, {
+    //   withCredentials: true, 
+    //   transportOptions: {
+    //     polling: {
+    //       extraHeaders: {
+    //         "hedera-chat-app": "abcd"
+    //       }
+    //     }
+    //   }
+    // });
     
-    
+    // const socket = socketIOClient(ENDPOINT);
+    socket.on("FromAPI", data => {
+      console.log(data);
+      // setTopicMsg(data);
+      dataController(data);
+    });
 
   }, []);
-
-  // useEffect(() => {
-  //   if(!!hederaClient){
-  //     // initializeDataTopicConnection();
-  //   }
-  // }, [hederaClient]);
 
   // Establish topic connection
   // const initializeDataTopicConnection = async () => {
@@ -100,42 +110,57 @@ function App() {
   const dataController = (message) => {
     const msgObj = JSON.parse(message);
     const msgType = msgObj.type;
-
-    if(msgType === UserAction.ADD_USER){
-        const user = msgObj.user
+    // console.log("topicMsg: " + topicMsg);
+    console.log("userMap: ", userMap);
+    // console.log("msgObj: ", msgObj);
+    console.log("userList: ", userList);
+    if(msgType === UserAction.NEW_USER){
+        const user = msgObj.user;
         if(!userMap[user]){
+            // let userMapTemp = {...outerUserMap};
+            // let userListTemp = [...appUserList, user];
             userMap[user] = {
                 pw: msgObj.pw, 
                 channels: [],
                 isLoggedIn: false,
             };
             userList.push(user);
-
-            // dispatch(setUserMap(userMap));
-            // dispatch(setUserList(userList));
+            // userListTemp.push(user);
+            // console.log("userMap2: ", userMapTemp);
+            // console.log("userList2: ", userListTemp);
+            // dispatch(setUserMap(userMapTemp));
+            // dispatch(setUserList(userListTemp));
         }
     }
-    else if(msgType === UserAction.ADD_DM){
+    else if(msgType === UserAction.NEW_DM){
         const channel = msgObj.channel;
         const user1 = msgObj.user1;
         const user2 = msgObj.user2;
         if(!dmChannelMap[channel] && !groupChannelMap[channel]){
+            // let dmChannelMapTemp = {...dmChannelMap};
             dmChannelMap[channel] = {
                 users: [user1, user2],
             };
+
+            // let dmChannelListTemp = [...dmChannelList];
             dmChannelList.unshift(channel);
+
+            // let userMapTemp = {...userMap};
             userMap[user1].channels.unshift(channel);
             userMap[user2].channels.unshift(channel);
 
-            // dispatch(setUserMap(userMap));
-            // dispatch(setDmChannelList(dmChannelList));
-            // dispatch(setDmChannelMap(dmChannelMap))
+            // dispatch(setUserMap(userMapTemp));
+            // dispatch(setDmChannelList(dmChannelListTemp));
+            // dispatch(setDmChannelMap(dmChannelMapTemp))
         };
     }
-    else if(msgType === UserAction.ADD_GROUP){
+    else if(msgType === UserAction.NEW_GROUP){
         const channel = msgObj.channel;
         if(!groupChannelMap[channel] && !dmChannelMap[channel]){
             const groupUsers = msgObj.users;
+            // let groupChannelMapTemp = {...groupChannelMap};
+            // let groupChannelListTemp = [...groupChannelList];
+            // let userMapTemp = {...userMap};
             groupChannelMap[channel] = {
                 creator: msgObj.creator,
                 name: msgObj.name,
@@ -144,9 +169,9 @@ function App() {
             groupChannelList.unshift(channel);
             groupUsers.forEach(user => userMap[user].channels.unshift(channel));
 
-            // dispatch(setGroupChannelMap(groupChannelMap))
-            // dispatch(setGroupChannelList(groupChannelList));
-            // dispatch(setUserMap(userMap));
+            // dispatch(setGroupChannelMap(groupChannelMapTemp))
+            // dispatch(setGroupChannelList(groupChannelListTemp));
+            // dispatch(setUserMap(userMapTemp));
         };
     }
     else if(msgType === UserAction.DELETE_GROUP){
@@ -154,37 +179,57 @@ function App() {
         const groupChannel = groupChannelMap[channel];
         if(groupChannel && msgObj.sender === groupChannel.creator){
             const groupUsers = groupChannel.users;
+            // let groupChannelMapTemp = {...groupChannelMap};
             delete groupChannelMap[channel];
+
+            // let groupChannelListTemp = [...groupChannelList];
             const groupListIndex = groupChannelList.indexOf(channel);
             if(groupListIndex > -1){
-                groupChannelList.splice(groupListIndex, 1);
+              groupChannelList.splice(groupListIndex, 1);
             }
+
+            // let deletedChannelListTemp = [...deletedChannelList];
             deletedChannelList.push(channel);
 
+            // let userMapTemp = {...userMap};
             groupUsers.forEach(user => {
                 const index = userMap[user].channels.indexOf(channel);
                 if(index > -1){
-                    userMap[user].channels.splice(index, 1);
+                  userMap[user].channels.splice(index, 1);
                 }
             });
 
-            // dispatch(setGroupChannelMap(groupChannelMap))
-            // dispatch(setGroupChannelList(groupChannelList));
-            // dispatch(setDeletedChannelList(deletedChannelList));
-            // dispatch(setUserMap(userMap));
+            // dispatch(setGroupChannelMap(groupChannelMapTemp))
+            // dispatch(setGroupChannelList(groupChannelListTemp));
+            // dispatch(setDeletedChannelList(deletedChannelListTemp));
+            // dispatch(setUserMap(userMapTemp));
 
         };
     }
     else if(msgType === UserAction.LOGIN){
-        userMap[msgObj.user].isLoggedIn = true;
-        // dispatch(setUserMap(userMap));
+        // let userMapTemp = {...userMap};
+        // console.log("UserAction.Login:userMapTemp: ", userMapTemp);
+        if(userMap[msgObj.user]){
+          // let userTemp = userMapTemp[msgObj.user];
+          userMap[msgObj.user].isLoggedIn = true;
+          // userMap[msgObj.user] = {
+          //   ...userTemp,
+          //   isLoggedIn: true,
+          // };
+          // dispatch(setUserMap(userMapTemp));
+        }
+        
     }
     else if(msgType === UserAction.LOGOUT){
-        userMap[msgObj.user].isLoggedIn = false;
-        // dispatch(setUserMap(userMap));
+        // let userMapTemp = {...userMap};
+        if(userMap[msgObj.user]){
+          userMap[msgObj.user].isLoggedIn = false;
+          // dispatch(setUserMap(userMapTemp));
+        }
     }
 
   }
+  const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
 
   return (
     <div className="flex flex-col w-screen bg-black h-screen ">
@@ -196,16 +241,17 @@ function App() {
           powered by Hedera Hashgraph
         </h1>
       </div>
+      {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
       {
-          !isLoggedIn && isNewAccountCreated &&
-          <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
-        }
-      <div className='flex mt-16 justify-center h-[700px] w-[1000px] bg-[black] self-center'>
+        !!!currentUser && isNewAccountCreated &&
+        <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
+      }
+      <div className={`flex ${bodyMarginTop} justify-center h-[700px] w-[1000px] bg-[black] self-center`}>
         
         { 
-          isLoggedIn 
+          !!currentUser 
           ? <MainChatScreen />
-          : <Login setLoggedIn={setLoggedIn} setNewAccountCreated={setNewAccountCreated}/>
+          : <Login setNewAccountCreated={setNewAccountCreated}/>
         }
         
       </div>
@@ -214,17 +260,6 @@ function App() {
     </div>
   );
 }
-
-{/* <img src={logo} className="App-logo" alt="logo" />
-  <p>
-    Edit <code>src/App.js</code> and save to reload.
-  </p>
-  <a
-    className="App-link"
-    href="https://reactjs.org"
-    target="_blank"
-    rel="noopener noreferrer"
-  ></a> */}
 
 export default App;
 
