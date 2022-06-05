@@ -1,20 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useContext, useRef } from 'react';
 import { setUser } from "../redux/userSlice";
 import { setUserList, setUserMap } from "../redux/usersSlice";
-import { sendDataTopicMessage } from '../helper/topicMessageSender';
 import { UserAction } from '../constants';
-import { useDispatch, useSelector } from 'react-redux';
-
+// import { useDispatch, useSelector } from 'react-redux';
+import AppContext from "../AppContext";
 import { TopicMessageSubmitTransaction } from "@hashgraph/sdk";
 import { loginUser, newUser } from '../helper/MessageMaker';
-import { userMap, userList } from '../data';
+import socketIOClient from "socket.io-client";
+import { CHAT_SERVER_ENDPOINT} from '../constants';
+import App from '../App';
+// import { userMap, userList } from '../data';
 // import SearchIcon from '@mui/icons-material/Search';
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
 
 
 const Login = (props) => {
-    const dispatch = useDispatch();
-    const hederaClient = useSelector((state) => state.user.hederaClient);
+    // const dispatch = useDispatch();
+    // const { setCurrentUser, hederaClient } = useContext(AppContext);
+    // const dataSocket = props.dataSocket;
+    // const myMessages = props.myMessages;
+    // console.log("Login: myMessages: ", myMessages);
+    // const hederaClient = props.hederaClient;
+    const {dataSocket, setCurrentUser, hederaClient, setDmChannelList, chatSocket, setChatSocket, setMyMessages} = useContext(AppContext);
+    // const setCurrentUser = props.setCurrentUser;
+    const userList = props.userList;
+    const userMap = props.userMap;
+    // console.log("Login: userMap: " , userMap);
+    // const hederaClient = useSelector((state) => state.user.hederaClient);
     // const userList = useSelector((state) => state.users.userList);
     // const userMap = useSelector((state) => state.users.userMap);
     const [loginType, setLoginType]= useState("login");
@@ -54,63 +66,120 @@ const Login = (props) => {
     }
 
     const authenticateUserLogin = async () => {
-        console.log("authenticateUserLogin");
-        console.log("!! : ", userMap );
-        const user = userMap[usernameInputValue];
-        console.log("user: ", user);
-        console.log("user.pw: " + user.pw +", pwinput: " + passwordInputValue );
-        if(user && user.pw === passwordInputValue){
-            console.log("here!");
-            let loginSuccessful = true;
-            console.log("authenticating log in");
-            if(!user.isLoggedIn){
-                console.log("user is not yet logged in");
-                let sendResponse = await new TopicMessageSubmitTransaction({
-                    topicId: "0.0.34717180",
-                    message: loginUser(usernameInputValue),
-                })
-                .execute(hederaClient);
-                const getReceipt = await sendResponse.getReceipt(hederaClient);
-                console.log("receiptStatus: " + getReceipt.status);
-                loginSuccessful = getReceipt.status._code === 22 ;
-            //    loginSuccessful = await sendDataTopicMessage(hederaClient, loginUser(user));
+        console.log("authenticateUserLogin...");
+        //1. authenticate user
+        // dataSocket.emit("authenticate", {user: usernameInputValue, pw: passwordInputValue, timestamp: new Date().getTime()});
+        dataSocket.on("authenticate_response", async (response) => {
+            console.log("authenticate_response: ", response);
+            if(response.isAuthorized){
+                // setCurrentUser(usernameInputValue);
+                // setErrorMessage("");
+                // setDmChannelList(response.userDmChannels);
+                const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+                    {
+                    withCredentials: true, 
+                    extraHeaders: {
+                      "hedera-chat-message": "abcd",
+                    }
+                  }
+                );
+                setChatSocket(_chatSocket);
+                console.log("chatSocket: ", chatSocket);
+                console.log("chatSocket truthy? : ", !!chatSocket);
+                _chatSocket.once("get_init_msg_load_response", msgLoad => {
+                    console.log("chatSocketMessageLoadResponse: ", msgLoad);
+                    setMyMessages(msgLoad);
+                    setCurrentUser(usernameInputValue);
+                    setErrorMessage("");
+                    setDmChannelList(response.userDmChannels);
+
+
+                });
+                const initialMsgLoadData = {
+                    user: usernameInputValue,
+                    channels: response.userDmChannels,
+                };
+                console.log("emit: get_init_msg_load: ", initialMsgLoadData);
+                _chatSocket.emit("get_init_msg_load", initialMsgLoadData);
+
+                // dataSocket.removeAllListeners("authenticate");
+                if(!response.isCurrentlyLoggedIn){
+                    let sendResponse = await new TopicMessageSubmitTransaction({
+                            topicId: "0.0.34717180",
+                            message: loginUser(usernameInputValue),
+                        })
+                        .execute(hederaClient);
+                    const getReceipt = await sendResponse.getReceipt(hederaClient);
+                    console.log("receiptStatus: " + getReceipt.status);
+                    // let loginSuccessful = getReceipt.status._code === 22 ;
+                }
             }
-            if(loginSuccessful) {
-                console.log("login successful");
-                dispatch(setUser(usernameInputValue));
-                setErrorMessage("");
+            else {
+                setErrorMessage("Invalid credentials. Try again.");
             }
-            // alert("logged in");
-       }else {
-            setErrorMessage("Invalid credentials. Try again.");
-        }
+        });
+        dataSocket.emit("authenticate", {user: usernameInputValue, pw: passwordInputValue, timestamp: new Date().getTime()});
+    };
+
+    // const authenticateUserLogin = async () => {
+    //     console.log("authenticateUserLogin");
+    //     console.log("!! : ", userMap );
+    //     const user = userMap[usernameInputValue];
+    //     console.log("user: ", user);
+    //     console.log("user.pw: " + user.pw +", pwinput: " + passwordInputValue );
+    //     if(user && user.pw === passwordInputValue){
+    //         console.log("here!");
+    //         let loginSuccessful = true;
+    //         console.log("authenticating log in");
+    //         if(!user.isLoggedIn){
+    //             console.log("user is not yet logged in");
+    //             let sendResponse = await new TopicMessageSubmitTransaction({
+    //                 topicId: "0.0.34717180",
+    //                 message: loginUser(usernameInputValue),
+    //             })
+    //             .execute(hederaClient);
+    //             const getReceipt = await sendResponse.getReceipt(hederaClient);
+    //             console.log("receiptStatus: " + getReceipt.status);
+    //             loginSuccessful = getReceipt.status._code === 22 ;
+    //         //    loginSuccessful = await sendDataTopicMessage(hederaClient, loginUser(user));
+    //         }
+    //         if(loginSuccessful) {
+    //             console.log("login successful");
+    //             // dispatch(setUser(usernameInputValue));
+    //             setCurrentUser(usernameInputValue);
+    //             setErrorMessage("");
+    //         }
+    //         // alert("logged in");
+    //    }else {
+    //         setErrorMessage("Invalid credentials. Try again.");
+    //     }
     
-        // const contractQuery = await new ContractCallQuery()
-        //     .setGas(100000)
-        //     .setContractId(hederaContractId)
-        //     .setFunction(
-        //         "authenticate", 
-        //         new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
-        //     )
-        //     .setQueryPayment(new Hbar(1));
+    //     // const contractQuery = await new ContractCallQuery()
+    //     //     .setGas(100000)
+    //     //     .setContractId(hederaContractId)
+    //     //     .setFunction(
+    //     //         "authenticate", 
+    //     //         new ContractFunctionParameters().addString(usernameInputValue).addString(passwordInputValue)
+    //     //     )
+    //     //     .setQueryPayment(new Hbar(1));
     
-        // //Submit to a Hedera network
-        // const getMessage = await contractQuery.execute(hederaClient);
-        // const message = getMessage.getString(0);
-        // // console.log("The contract message: authenticate? " + message);
-        // // console.log("4. Balance after querying big file smartcontract: " + await getAccountBalance(myAccountId, client));
+    //     // //Submit to a Hedera network
+    //     // const getMessage = await contractQuery.execute(hederaClient);
+    //     // const message = getMessage.getString(0);
+    //     // // console.log("The contract message: authenticate? " + message);
+    //     // // console.log("4. Balance after querying big file smartcontract: " + await getAccountBalance(myAccountId, client));
        
        
-        // if(message === "success"){
-        //     //call callback to show user dashboard
-        //     props.setLoggedIn(true);
-        //     setErrorMessage("");
-        //     dispatch(setUser(usernameInputValue));
-        //     alert("logged in");
-        // }else {
-        //     setErrorMessage("Invalid credentials. Try again.");
-        // }
-    }
+    //     // if(message === "success"){
+    //     //     //call callback to show user dashboard
+    //     //     props.setLoggedIn(true);
+    //     //     setErrorMessage("");
+    //     //     dispatch(setUser(usernameInputValue));
+    //     //     alert("logged in");
+    //     // }else {
+    //     //     setErrorMessage("Invalid credentials. Try again.");
+    //     // }
+    // }
 
     const checkUsernameAvailability = async () => {
         console.log("checkUsernameAvailability...");

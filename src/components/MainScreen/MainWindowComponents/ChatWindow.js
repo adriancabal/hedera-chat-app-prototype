@@ -1,0 +1,417 @@
+import { useState, useContext } from 'react';
+import { useSelector } from 'react-redux';
+import SendIcon from '@mui/icons-material/Send';
+import CircleIcon from '@mui/icons-material/Circle';
+import AppContext from "../../../AppContext";
+// import { userMap, dmChannelList, dmChannelMap, setChannelIndex } from '../../../data';
+import { TopicMessageSubmitTransaction} from "@hashgraph/sdk";
+import { newDm, sendDM } from '../../../helper/MessageMaker';
+// import { channelIndex, deletedChannelList } from '../../../data';
+import { MessageType } from '../../../constants';
+import { setDmChannelList, setDmChannelMap } from '../../../redux/channelsSlice';
+import { setUserMap } from '../../../redux/usersSlice';
+const DATA_TOPIC_ID = process.env.REACT_APP_HEDERA_DATA_TOPIC_ID;
+const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
+
+// const messagesMock = [
+//     {message: "are you good?", timestamp: "4:31pm", sender: "user2"},
+//     {message: "hello", timestamp: "4:30pm", sender: "user1"},
+//     {message: "what's up fdsjhfjdkhkdfsdkjhfdjhfjfhjfshfjkdhfsjkhfjfhsjfhfjshfsjkfhsjfhsdjfhkjfhsddkjfhsdjfhskjhfsjkfhsjkhfjkdhfkshfjshfshjhfkjshfhfjkfhsjkhfsdjkhfskdfadrianrodeabike", 
+//     timestamp: "4:30pm", sender: "user2"},
+// ]
+
+const ChatWindow = (props) => {
+    const { currentUser, hederaClient, myMessages, setMyMessages, chatSocket } = useContext(AppContext);
+    // const currentUser = useSelector((state) => state.user.currentUser);
+    // const hederaClient = useSelector((state) => state.user.hederaClient);
+    const { dataSocket, userDms} = useContext(AppContext);
+    const [messageInputValue, setMessageInputValue] = useState("");
+    // const myMessages = props.myMessages;
+    // const setMyMessages = props.setMyMessages;
+    const dmUser = props.currentDmUser;
+    // const chatSocket = props.chatSocket; // move to context
+    // const [users, setUsers] = useState(userMap);
+    // const [_myMessages, setMyMessages] = useState(myMessages);
+    console.log("ChatWindow: myMessages: ", myMessages);
+    // console.log("_myMessages2: ", myMessages[1]);
+    // const myDmChannel = findExistingDmChannel();
+
+    // const getDmChannel = () => {
+    //     let channel = -1;
+    //     userMap[currentUser].dms.forEach(dm => {
+    //         if(dm[0] === dmUser){
+    //             channel = dm[1];
+    //         }
+    //     });
+    //     return channel;
+    // }
+
+    // users[currentUser].dms.forEach(dm => {
+    //     if(dm[0] === dmUser){
+    //         return dm[1];
+    //     }
+    // }) || -1;
+    // const myDmChannel = getDmChannel();
+    // console.log("myDmChannel: ", myDmChannel);
+    const dmMsgMap =  myMessages[dmUser.channel] ? myMessages[dmUser.channel].msgMap : {};
+    const messages = dmUser && dmUser.channel > 0 && myMessages && myMessages[dmUser.channel] ? myMessages[dmUser.channel].msgList : [];
+    if(messages.length && messages[messages.length -1] !== 0){
+        messages.push(0);
+    }
+    
+    console.log("messages: ", messages);
+    // const messages = messagesMock;
+    // const dmUsers = userMap[currentUser].dms.map(dm => dm[0]);
+    console.log("userDms: ", userDms);
+    console.log("dmUser: ", dmUser);
+    const dmUserProfile = userDms.length > 0 
+        ? userDms.filter(dm => dm.user === dmUser.user) 
+        : [];
+    console.log("dmUserProfile: ", dmUserProfile);
+
+    const statusIconColor = dmUser && dmUser.isLoggedIn ? "text-[green]" : "text-[gray]";
+    // const statusIconColor = dmUserProfile.length > 0 && dmUserProfile[0].isLoggedIn ? "text-[green]" : "text-[gray]";
+    const sendButtonHoverCursor = messageInputValue ? "hover:cursor-pointer" : "";
+    const sendButtonBgColor = messageInputValue ? "hover:text-[#6ce6a1]" : "";
+
+
+    const onClickSend = async () => {
+        console.log("onClickSend");
+        if(messageInputValue){
+
+            // create a dm channel if it doesn't exist (if there is no message history)
+            // if(!dmUsers.includes(dmUser)){
+            if(dmUserProfile.length === 0){
+                console.log("dmuser doesn't yet exist");
+                dataSocket.emit("getDeletedChannels");
+                dataSocket.once("getDeletedChannels_response", async (response) => {
+                    // dataSocket.removeAllListeners("getDeletedChannels_response");
+                    console.log("getDeletedChannels_response: ", response);
+                    const deletedChannelList = response.deletedChannelList;
+                    const channelIndex = response.channelIndex;
+                    //  create new dm channel
+                    const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
+                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
+                    if(isSuccess){
+                        // let _dmChannelMap = {...dmChannelMap};
+                        // let _dmChannelList = [...dmChannelList];
+                        // let _userMap = {...userMap};
+                        // console.log("sendChatMsgSuccess to new dmuser");
+                        // // update local data with new dm channel created
+                        // if(deletedChannelList.length > 0){
+                        //     let _deletedChannelList = [...deletedChannelList];
+                        //     _deletedChannelList.shift();
+                        // } else{
+                        //     channelIndex = channelIndex + 1;
+                        // }
+
+
+                        // _dmChannelMap[newChannel] = {
+                        //     users: [currentUser, dmUser],
+                        // };
+                        // _dmChannelList.unshift(newChannel);
+                        // _userMap[currentUser].dms.unshift([dmUser, newChannel]);
+                        // _userMap[dmUser].dms.unshift([currentUser, newChannel]);
+                        // setChannelIndexMax(newChannel);
+                        
+                        // send DM message
+                        let _myMessages = {...myMessages};
+                        _myMessages[newChannel] = {
+                            type: MessageType.DM,
+                            msgMap: {},
+                            msgList: [0],
+                            unread: 0,
+                        };
+                        // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                        const timestamp = new Date().getTime();
+                        const messageString = sendDM(newChannel, currentUser, messageInputValue, 1, timestamp);
+                        const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                        console.log("send first message Success: " + isSendChatMsgSuccess);
+                        // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
+                        // const isSendChatMsgSuccess = true;
+                        if(isSendChatMsgSuccess){
+                            // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                            _myMessages[newChannel].msgMap[1] = {
+                                timestamp: timestamp,
+                                msg: messageInputValue,
+                                sender: currentUser,
+                            };
+                            _myMessages[newChannel].msgList.unshift(1);
+                            const messageDm = {
+                                messageString: messageString,
+                                dmUser: dmUser.user,
+                            };
+                            chatSocket.emit("send_message_dm", messageDm);
+                            setMyMessages(_myMessages);
+                            setMessageInputValue("");
+                        }
+                    }
+                    else {
+                        // display message unable to send message
+                    }
+                    
+                });
+                
+                // //  create new dm channel
+                // const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
+                // const isSuccess = sendDataTopicMessage(newDm(newChannel, currentUser, dmUser));
+                
+                // if(isSuccess){
+                //     let _dmChannelMap = {...dmChannelMap};
+                //     let _dmChannelList = [...dmChannelList];
+                //     let _userMap = {...userMap};
+                //     console.log("sendChatMsgSuccess to new dmuser");
+                //     // update local data with new dm channel created
+                //     if(deletedChannelList.length > 0){
+                //         let _deletedChannelList = [...deletedChannelList];
+                //         _deletedChannelList.shift();
+                //     } else{
+                //         channelIndex = channelIndex + 1;
+                //     }
+
+
+                //     _dmChannelMap[newChannel] = {
+                //         users: [currentUser, dmUser],
+                //     };
+                //     _dmChannelList.unshift(newChannel);
+                //     _userMap[currentUser].dms.unshift([dmUser, newChannel]);
+                //     _userMap[dmUser].dms.unshift([currentUser, newChannel]);
+                //     setChannelIndexMax(newChannel);
+                    
+                //     // send DM message
+                //     _myMessages[newChannel] = {
+                //         type: MessageType.DM,
+                //         msgMap: {
+                //             0: {
+                //                 msg: `Beginning of your chat history with ${dmUser}...`,
+                //                 type: 1,
+                //             },
+                //         },
+                //         msgList: [],
+                //     };
+                //     // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                //     const timestamp = new Date().getTime();
+                //     const messageString = sendDM(newChannel, currentUser, messageInputValue, 1, timestamp);
+                //     // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
+                //     const isSendChatMsgSuccess = true;
+                //     if(isSendChatMsgSuccess){
+                //         // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                //         _myMessages[newChannel].msgMap[1] = {
+                //             timestamp: timestamp,
+                //             msg: messageInputValue,
+                //             sender: currentUser,
+                //         };
+                //         _myMessages[newChannel].msgList.unshift(1);
+                //         chatSocket.emit("send_message", messageString);
+                //         setMyMessages(_myMessages);
+                //         setDmChannelMap(_dmChannelMap);
+                //         setDmChannelList(_dmChannelList);
+                //         setUserMap(_userMap);
+                //         setMessageInputValue("");
+                //     }
+                // }
+            }
+            else {
+                console.log("dmuser already exists");
+                // send message to existing dm channel
+                // const existingDMChannel = findExistingDmChannel();
+                const existingDMChannel = dmUserProfile[0].channel;
+                console.log("existingDmChannel: ", existingDMChannel);
+                const dmChannel = existingDMChannel < 0 ? 0 : existingDMChannel;
+                console.log("dmChannel: ", dmChannel);
+                console.log("myMessages: ", myMessages);
+                let _myMessages = {...myMessages};
+                const currentMessageIndex = _myMessages[dmChannel].msgList.length;
+                const timestamp = new Date().getTime();
+                const messageString = sendDM(dmChannel, currentUser, messageInputValue, currentMessageIndex, timestamp);
+                
+                console.log("sendChatMsgSuccess to existing dmuser");
+                _myMessages[dmChannel].msgMap[currentMessageIndex] = {
+                    timestamp: timestamp,
+                    msg: messageInputValue,
+                    sender: currentUser,
+                };
+                _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
+                const messageDm = {
+                    messageString: messageString,
+                    dmUser: dmUser.user,
+                };
+                chatSocket.emit("send_message_dm", messageDm);
+                setMessageInputValue("");
+                setMyMessages(_myMessages);
+                
+                
+                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
+                // if(isSendChatMsgSuccess){
+                //     console.log("sendChatMsgSuccess to existing dmuser");
+                //     _myMessages[dmChannel].msgMap[currentMessageIndex] = {
+                //         timestamp: timestamp,
+                //         msg: messageInputValue,
+                //         sender: currentUser,
+                //     };
+                //     _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
+                //     const messageDm = {
+                //         messageString: messageString,
+                //         dmUser: dmUser.user,
+                //     };
+                //     chatSocket.emit("send_message_dm", messageDm);
+                //     setMessageInputValue("");
+                //     setMyMessages(_myMessages);
+                // }
+            }
+        }
+    }
+
+    // const findExistingDmChannel = () => {
+    //     console.log("currentUser: ", currentUser);
+    //     console.log("dmUser: ", dmUser);
+    //     console.log("userMap: ", userMap);
+    //     let dmChannelTemp = -1;
+    //     userMap[currentUser].dms.forEach(dm => {
+    //         if(dm[0] === dmUser){
+    //             console.log("dm[0]: ", dm[0]);
+    //             console.log("dm[1]: ", dm[1]);
+    //         dmChannelTemp = dm[1];
+    //         }
+    //     });
+    //     return dmChannelTemp;
+    // }
+
+    const onChangeMessageInput = (value) => {
+        setMessageInputValue(value);
+    }
+
+    const sendDataTopicMessage = async (dataMessage: string) => {
+        let sendResponse = await new TopicMessageSubmitTransaction({
+            topicId: DATA_TOPIC_ID,
+            message: dataMessage,
+        }).execute(hederaClient);
+    
+        const getReceipt = await sendResponse.getReceipt(hederaClient);
+        console.log("receiptStatus: ", getReceipt.status);
+        return getReceipt.status._code === 22 ;
+        // console.log("The message transaction status: " + transactionStatus)
+    }
+
+    const sendChatTopicMessage = async (chatMessage: string) => {
+        console.log("sendChatTopicMessage: ", chatMessage);
+        let sendResponse = await new TopicMessageSubmitTransaction({
+            topicId: MESSAGE_TOPIC_ID,
+            message: chatMessage,
+        })
+        .execute(hederaClient);
+    
+        const getReceipt = await sendResponse.getReceipt(hederaClient);
+        console.log("getReceipt: ", getReceipt );
+        console.log("getReceipt.status: " + getReceipt.status );
+        console.log("getReceiptStatus = 22 : ", getReceipt.status === 22 );
+        return getReceipt.status._code === 22 ;
+        // console.log("The message transaction status: " + transactionStatus)
+    }
+
+    // console.log("ChatWindow-myMessages: ", myMessages[1]);
+
+    return (
+        <div className="flex flex-col w-full h-full">
+            <div className='flex flex-row w-full h-12 bg-[#343d33]  border-y-[1px] border-[gray]' >
+                <p className='self-center text-white ml-4'>{"Direct Message:"}</p>
+                <div className={`flex ${statusIconColor} justify-center ml-4`}>
+                    <CircleIcon className='self-center' fontSize=''/>
+                </div>
+                
+                <p className='self-center font-bold text-white ml-2'>{dmUser.user}</p>
+            </div>
+
+
+            <div className='flex flex-col-reverse w-full h-[650px] bg-[transparent] scrollbar-dark-gray'>
+                
+                {
+                    // myMessages[dmUser.channel].msgList.map(messageIndex => {
+                        
+                    messages.map(messageIndex => {
+                        
+                        // const myMessage = myMessages[dmUser.channel].msgMap[messageIndex];
+                        let myMessage = dmMsgMap[messageIndex];
+                        if(messageIndex === 0){
+                            myMessage = {
+                               msg: `*** Beginning of your chat history with ${dmUser.user} ***`,
+                            } ;
+                        }
+                        console.log("myMessage: ", myMessage);
+                        const sender = myMessage.sender;
+                        //timestamp
+                        let messageTimestamp;
+                        let date;
+                        let hours;
+                        let minutes;
+                        let meridian;
+                        if(sender){
+                            messageTimestamp = myMessage.timestamp;
+                            date = new Date(messageTimestamp);
+                            const modHour = date.getHours() % 12;
+                            hours = modHour === 0 ? 12 : modHour;
+                            minutes = date.getMinutes();
+                            minutes = minutes < 10 ? "0" + minutes : minutes;
+                            meridian = date.getHours() < 12 ? "am" : "pm";
+                        }
+
+                        
+                        const msgSenderColor = myMessage.sender === currentUser ? "text-[#3ff281]" : "text-[#3edced]";
+                        const msgTimeColor = myMessage.sender === currentUser ? "text-[#a4edba]" : "text-[#9fe5ed]";
+                        return (
+                            <div className="flex flex-col w-full border-t-[1px] border-[gray] p-2">
+                                {
+                                    !!sender &&
+                                    <div className='flex flex-row w-full h-8'>
+                                        <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
+                                        <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
+                                    </div>
+                                }
+                                
+                                <div className='flex flex-col w-full grow  break-words'>
+                                    {/* {message.message} */}
+                                    <p className='flex grow w-full text-white break-words line-clamp-6 '>{myMessage.msg}</p>
+                                </div>
+                                
+                            </div>
+                        )
+                    })
+                }
+                {
+                    !myMessages[dmUser.channel] && 
+                    <div className="flex w-full border-t-[0px] border-[gray] p-2 pt-4">
+                        <div className='flex flex-row w-full h-8'>
+                            <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div className='flex flex-row w-full h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2'>
+                <input
+                    autoComplete={"off"}
+                    className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"
+                    type="text" 
+                    name="send-message" 
+                    placeholder={"write a message"}
+                    value={messageInputValue}
+                    onChange={e => {
+                        onChangeMessageInput(e.target.value);
+                    }}
+                />
+                <div 
+                    className={`flex text-white w-12 h-10 self-center justify-center ${sendButtonHoverCursor} ${sendButtonBgColor}`}
+                    onClick={() => onClickSend() }
+                >
+                    <SendIcon className='self-center'/>
+                </div>
+            </div>
+        </div>
+);
+        
+        
+}
+
+export default ChatWindow;

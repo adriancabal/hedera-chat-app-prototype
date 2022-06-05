@@ -1,4 +1,4 @@
-import { UserAction } from '../constants';
+import { MessageType, UserAction } from '../constants';
 
 export const newUser = (user: string, pw: string) => {
     const msgObj = {
@@ -53,3 +53,27 @@ export const logoutUser = (user: string) => {
     };
     return JSON.stringify(msgObj);
 }
+
+// Send DM Message
+export const sendDM = (channel: number, sender: string, message: string, index: number, timestamp: number) => {
+    const msgObj = {
+        type: MessageType.DM,
+        channel: channel,
+        sender: sender,
+        message: message,
+        index: index,
+        timestamp: timestamp,
+    };
+    return JSON.stringify(msgObj);
+};
+
+//Send Group Message
+export const sendGroupMessage = (channel: number, sender: string, message: string) => {
+    const msgObj = {
+        type: MessageType.GROUP,
+        channel: channel,
+        sender: sender,
+        message: message,
+    };
+    return JSON.stringify(msgObj);
+};

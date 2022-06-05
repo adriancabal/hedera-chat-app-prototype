@@ -70,3 +70,49 @@
   border-right:3px solid transparent;
   border-left:3px solid transparent;
 }
+
+/* scrollbar dark gray */
+.scrollbar-dark-gray {
+  display: flex;
+  /* display: block; */
+  /* width: 10em; */
+  overflow-y: scroll;
+}
+.scrollbar-dark-gray::-webkit-scrollbar {
+  width: 14px;
+  height: 4px;
+  background-color: #292a33;
+  /* border-left: ; */
+  border-left: 2px solid black;
+  /* background-color: gray; */
+}
+.scrollbar-dark-gray::-webkit-scrollbar-thumb {
+  width: 5px;
+  border-radius: 6px;
+  background: #aaa;
+  /* background: #292a33; */
+  max-height: 10px;
+  padding: 2px;
+  background-clip: padding-box;
+  border-right:3px solid transparent;
+  border-left:3px solid transparent;
+}
+.search-dm-input-text {
+  color: white;
+}
+
+.search-input-placeholder::placeholder {
+  color: white;
+}
+
+.display-linebreak {
+  white-space: pre-line;
+}
+
+.circle {
+  display: flex;
+  width: 30px;
+  height: 20px;
+  background-color: red;
+  border-radius: 40%;
+}

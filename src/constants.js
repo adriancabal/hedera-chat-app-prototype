@@ -6,3 +6,10 @@ export const UserAction = {
     LOGIN: 4,
     LOGOUT: 5,
 }
+
+export const MessageType = {
+    DM: 0,
+    GROUP: 1,
+}
+
+export const CHAT_SERVER_ENDPOINT = "http://localhost:5003";

@@ -6,6 +6,7 @@ export const userSlice = createSlice({
     currentUser: "",
     hederaClient: null,
     smartContractId: "",
+    socket: null,
   },
   reducers: {
     setUser: (state, action) => {
@@ -18,6 +19,9 @@ export const userSlice = createSlice({
     setHederaClient: (state, action) => {
         state.hederaClient = action.payload;
     },
+    setSocket: (state, action) => {
+      state.socket = action.payload;
+    },
     setSmartContractId: (state, action) => {
         state.smartContractId = action.payload;
     },
@@ -28,6 +32,6 @@ export const userSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { setHederaClient, setSmartContractId, setUser, resetUser } = userSlice.actions
+export const { setHederaClient, setSmartContractId, setUser, setSocket, resetUser } = userSlice.actions
 
 export default userSlice.reducer

@@ -1,30 +1,58 @@
-// import logo from './logo.svg';
-import { useDispatch, useSelector } from 'react-redux';
-import { setHederaClient, setSmartContractId } from "./redux/userSlice";
+// import { useDispatch, useSelector } from 'react-redux';
+// import { setHederaClient, setSocket } from "./redux/userSlice";
 // import { setUserList, setUserMap } from "./redux/usersSlice";
 // import { setDeletedChannelList, setDmChannelList, setGroupChannelList, setDmChannelMap, setGroupChannelMap } from "./redux/channelsSlice";
 import './App.css';
+// import { AppProvider } from "./AppContext";
+// import AppContext from "./AppContext";
 import Login from './components/Login';
 import MainChatScreen from './components/MainChatScreen';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
-import { UserAction } from './constants';
+import { UserAction, CHAT_SERVER_ENDPOINT} from './constants';
 import socketIOClient from "socket.io-client";
-import { userMap, userList, dmChannelMap, groupChannelMap, dmChannelList, groupChannelList, deletedChannelList} from './data';
-const ENDPOINT = "http://localhost:4001";
-const DATA_TOPIC_ID = "0.0.34717180";
+import AppContext from './AppContext';
+// import {
+//   setChannelIndex,
+//   userMap, 
+//   userList, 
+//   dmChannelMap, 
+//   groupChannelMap, 
+//   dmChannelList, 
+//   groupChannelList, 
+//   deletedChannelList,
+//   channelIndex,
+// } from './data';
+const ENDPOINT = "http://localhost:4420";
+// const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 // let outerUserMap ={};
 
-function App() {
+const App = () => {
   // const hederaClient = useSelector((state) => state.user.hederaClient);
-  const dispatch = useDispatch();
+  // const { currentUser, setHederaClient, userMap, setUserMap, userList, setUserList, dmChannelList, setDmChannelList, dmChannelMap, setDmChannelMap, groupChannelMap, groupChannelList, deletedChannelList, channelIndex, setChannelIndex} = useContext(AppContext);
+  const {setHederaClient} = useContext(AppContext);
+  const [userMap, setUserMap] = useState({});
+  const [userList, setUserList] = useState([]);
+  // const [hederaClient, setHederaClient] = useState(null);
+  const { currentUser, setDataSocket, setChatSocket, setMyMessages } = useContext(AppContext);
+  // const [currentUser, setCurrentUser] = useState("");
+  const  [dmChannelMap, setDmChannelMap] = useState({});
+  const [dmChannelList, setDmChannelList] = useState([]);
+  const [groupChannelMap, setGroupChannelMap] = useState({});
+  const [groupChannelList, setGroupChannelList] = useState([]);
+  const [channelIndex, setChannelIndex] = useState(0);
+  const [deletedChannelList, setDeletedChannelList] = useState([]);
+  // const [myMessages, setMyMessages] = useState([]);
+  // const [dataSocket, setDataSocket] = useState(null);
+
+  // const dispatch = useDispatch();
   // const [isLoggedIn, setLoggedIn] = useState(false);
   const [isNewAccountCreated, setNewAccountCreated] = useState(false);
   // const [topicMsg, setTopicMsg] = useState("init");
   // const [appUserList, setAppUserList] = useState([]);
 
-  const currentUser = useSelector((state) => state.user.currentUser);
+  // const currentUser = useSelector((state) => state.user.currentUser);
   // const userList = useSelector((state) => state.users.userList);
   // const userMap = useSelector((state) => state.users.userMap);
   // const deletedChannelList = useSelector((state) => state.channels.deletedChannelList);
@@ -32,17 +60,14 @@ function App() {
   // const groupChannelMap = useSelector((state) => state.channels.groupChannelMap);
   // const dmChannelList = useSelector((state) => state.channels.dmChannelList);
   // const groupChannelList = useSelector((state) => state.channels.groupChannelList);
-  const hederaClient = useSelector((state) => state.user.hederaClient);
+  // const hederaClient = useSelector((state) => state.user.hederaClient);
 
   useEffect(() => {
-    
+    console.log("AppContext: ", currentUser);
+    console.log("APP.JS useeffect");
 
     const myAccountId = process.env.REACT_APP_MY_ACCOUNT_ID;
     const myPrivateKey = process.env.REACT_APP_MY_PRIVATE_KEY;
-    const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$")
-    console.log("myAccountId: " +  myAccountId);
-    console.log("myPrivateKey: " + myPrivateKey);
     // If we weren't able to grab it, we should throw a new error
     if (myAccountId == null ||
         myPrivateKey == null ) {
@@ -52,20 +77,61 @@ function App() {
     // Establish client connection
     client = Client.forTestnet();
     client.setOperator(AccountId.fromString(myAccountId) ,PrivateKey.fromString(myPrivateKey));
+    // hederaClient = client;
     // console.log("client: ", client._mirrorNetwork);
-    dispatch(setHederaClient(client));
+    // dispatch(setHederaClient(client));
+    setHederaClient(client);
     // dispatch(setSmartContractId(hederaContractId));
 
     console.log("initializingDataTopicConnection...");
-    const socket = socketIOClient(ENDPOINT, 
+    
+    const _dataSocket = socketIOClient(ENDPOINT, 
       {
-      withCredentials: true, 
-      extraHeaders: {
-        "hedera-chat-app": "abcd",
-        // 'Access-Control-Allow-Credentials': true,
+        withCredentials: true, 
+        extraHeaders: {
+          "hedera-chat-app": "abcd",
+          // 'Access-Control-Allow-Credentials': true,
+        }
       }
-    }
     );
+
+    setDataSocket(_dataSocket);
+
+    // const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+    //     {
+    //     withCredentials: true, 
+    //     extraHeaders: {
+    //       "hedera-chat-message": "abcd",
+    //     }
+    //   }
+    // );
+    // setChatSocket(_chatSocket);
+
+    // _chatSocket.once("get_init_msg_load_response", msgLoad => {
+    //     console.log("get_init_msg_load_response: ", msgLoad);
+    //     setMyMessages(msgLoad);
+    // });
+    // const initialMsgLoadData = {
+    //     user: currentUser,
+    //     channels: dmChannelList,
+    // };
+    // console.log("emit: get_init_msg_load: ", initialMsgLoadData);
+    // _chatSocket.emit("get_init_msg_load", initialMsgLoadData);
+
+    // const socket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+    //   {
+    //     withCredentials: true, 
+    //     extraHeaders: {
+    //       "hedera-chat-message": "abcd",
+    //       // 'Access-Control-Allow-Credentials': true,
+    //     }
+    //   }
+    // );
+
+    // socket.disconnect();
+
+    // dispatch(setSocket(socket));
+
 
     // const socket = socketIOClient(ENDPOINT, {
     //   withCredentials: true, 
@@ -79,11 +145,26 @@ function App() {
     // });
     
     // const socket = socketIOClient(ENDPOINT);
-    socket.on("FromAPI", data => {
-      console.log(data);
-      // setTopicMsg(data);
-      dataController(data);
-    });
+    // socket.connect();
+    // console.log("App.js right before getDmUsers...");
+    // socket.emit("getDmUsers", "user1" );
+
+    // socket.on("getDMUsers_response", data => {
+    //   console.log("getDMUsers_response: ", data);
+    //   // setTopicMsg(data);
+    //   // dataController(data);
+    // });
+
+    // socket.on("ChatMessages", message => {
+    //     console.log("on chatMessages...: ", message);
+    //     console.log("myMessages: ", myMessages);
+    //     let _myMessages =[...myMessages];
+    //     _myMessages.push(message);
+    //     setMyMessages(_myMessages);
+    //     // console.log("messageTimestamp: ", message.consensusTimestamp.seconds.low);
+    //     // const messageAsString = Buffer.from(message.contents, "utf8").toString();
+    //     // chatMessageController(messageAsString);
+    // });
 
   }, []);
 
@@ -108,23 +189,27 @@ function App() {
   // }
 
   const dataController = (message) => {
+    
     const msgObj = JSON.parse(message);
     const msgType = msgObj.type;
     // console.log("topicMsg: " + topicMsg);
     console.log("userMap: ", userMap);
     // console.log("msgObj: ", msgObj);
-    console.log("userList: ", userList);
+    // console.log("userList: ", userList);
     if(msgType === UserAction.NEW_USER){
         const user = msgObj.user;
         if(!userMap[user]){
-            // let userMapTemp = {...outerUserMap};
-            // let userListTemp = [...appUserList, user];
-            userMap[user] = {
-                pw: msgObj.pw, 
-                channels: [],
-                isLoggedIn: false,
-            };
-            userList.push(user);
+          let _userMap = {...userMap};
+          _userMap[user] = {
+              pw: msgObj.pw, 
+              dms:[],
+              groups: [],
+              isLoggedIn: false,
+          };
+          let _userList = [...userList];
+          _userList.push(user);
+          setUserMap(_userMap);
+          setUserList(_userList);
             // userListTemp.push(user);
             // console.log("userMap2: ", userMapTemp);
             // console.log("userList2: ", userListTemp);
@@ -138,17 +223,22 @@ function App() {
         const user2 = msgObj.user2;
         if(!dmChannelMap[channel] && !groupChannelMap[channel]){
             // let dmChannelMapTemp = {...dmChannelMap};
-            dmChannelMap[channel] = {
+            let _dmChannelMap = {...dmChannelMap};
+            _dmChannelMap[channel] = {
                 users: [user1, user2],
             };
 
-            // let dmChannelListTemp = [...dmChannelList];
-            dmChannelList.unshift(channel);
+            let _dmChannelList = [...dmChannelList];
+            _dmChannelList.unshift(channel);
 
-            // let userMapTemp = {...userMap};
-            userMap[user1].channels.unshift(channel);
-            userMap[user2].channels.unshift(channel);
+            let _userMap = {...userMap};
+            _userMap[user1].dms.unshift([user2, channel]);
+            _userMap[user2].dms.unshift([user1, channel]);
 
+            setDmChannelMap(_dmChannelMap);
+            setDmChannelList(_dmChannelList);
+            setUserMap(_userMap);
+            setChannelIndex(channel);
             // dispatch(setUserMap(userMapTemp));
             // dispatch(setDmChannelList(dmChannelListTemp));
             // dispatch(setDmChannelMap(dmChannelMapTemp))
@@ -167,8 +257,8 @@ function App() {
                 users: groupUsers,
             };
             groupChannelList.unshift(channel);
-            groupUsers.forEach(user => userMap[user].channels.unshift(channel));
-
+            groupUsers.forEach(user => userMap[user].groups.unshift(channel));
+            setChannelIndex(channel);
             // dispatch(setGroupChannelMap(groupChannelMapTemp))
             // dispatch(setGroupChannelList(groupChannelListTemp));
             // dispatch(setUserMap(userMapTemp));
@@ -199,6 +289,12 @@ function App() {
                 }
             });
 
+            if(channel === channelIndex){
+              const maxIndex = Math.max(...groupChannelList);
+              let _channelIndex =  maxIndex!==-Infinity && !isNaN(maxIndex) ? maxIndex : 0;
+              setChannelIndex(_channelIndex);
+            }
+
             // dispatch(setGroupChannelMap(groupChannelMapTemp))
             // dispatch(setGroupChannelList(groupChannelListTemp));
             // dispatch(setDeletedChannelList(deletedChannelListTemp));
@@ -207,11 +303,12 @@ function App() {
         };
     }
     else if(msgType === UserAction.LOGIN){
-        // let userMapTemp = {...userMap};
+        let _userMap = {...userMap};
         // console.log("UserAction.Login:userMapTemp: ", userMapTemp);
-        if(userMap[msgObj.user]){
+        if(_userMap[msgObj.user]){
           // let userTemp = userMapTemp[msgObj.user];
-          userMap[msgObj.user].isLoggedIn = true;
+          _userMap[msgObj.user].isLoggedIn = true;
+          setUserMap(_userMap);
           // userMap[msgObj.user] = {
           //   ...userTemp,
           //   isLoggedIn: true,
@@ -221,43 +318,42 @@ function App() {
         
     }
     else if(msgType === UserAction.LOGOUT){
-        // let userMapTemp = {...userMap};
-        if(userMap[msgObj.user]){
-          userMap[msgObj.user].isLoggedIn = false;
+        let _userMap = {...userMap};
+        if(_userMap[msgObj.user]){
+          _userMap[msgObj.user].isLoggedIn = false;
+          setUserMap(_userMap);
           // dispatch(setUserMap(userMapTemp));
         }
     }
 
   }
+
   const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
 
   return (
-    <div className="flex flex-col w-screen bg-black h-screen ">
-      <div className='flex flex-col mt-16 mb-16 h-20 justify-center bg-[black]'>
-        <h1 className="text-center text-white text-4xl ">
-          Chat App Prototype
-        </h1>
-        <h1 className="text-center text-white text-md mt-2">
-          powered by Hedera Hashgraph
-        </h1>
-      </div>
-      {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
-      {
-        !!!currentUser && isNewAccountCreated &&
-        <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
-      }
-      <div className={`flex ${bodyMarginTop} justify-center h-[700px] w-[1000px] bg-[black] self-center`}>
-        
-        { 
-          !!currentUser 
-          ? <MainChatScreen />
-          : <Login setNewAccountCreated={setNewAccountCreated}/>
+      <div className="flex flex-col w-screen bg-black h-screen ">
+        <div className='flex flex-col mt-16 mb-16 h-20 justify-center bg-[black]'>
+          <h1 className="text-center text-white text-4xl ">
+            Chat App Prototype
+          </h1>
+          <h1 className="text-center text-white text-md mt-2">
+            powered by Hedera Hashgraph
+          </h1>
+        </div>
+        {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
+        {
+          !!!currentUser && isNewAccountCreated &&
+          <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
         }
-        
+        <div className={`flex ${bodyMarginTop} justify-center h-[700px] w-[1000px] bg-[black] self-center`}>
+          
+          { 
+            !!currentUser 
+            ? <MainChatScreen />
+            : <Login setNewAccountCreated={setNewAccountCreated}/>
+          }
+        </div>
       </div>
-      
-      
-    </div>
   );
 }
 
