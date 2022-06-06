@@ -84,9 +84,8 @@ const Login = (props) => {
                   }
                 );
                 setChatSocket(_chatSocket);
-                console.log("chatSocket: ", chatSocket);
-                console.log("chatSocket truthy? : ", !!chatSocket);
-                _chatSocket.once("get_init_msg_load_response", msgLoad => {
+                
+                _chatSocket.on("get_init_msg_load_response", msgLoad => {
                     console.log("chatSocketMessageLoadResponse: ", msgLoad);
                     setMyMessages(msgLoad);
                     setCurrentUser(usernameInputValue);

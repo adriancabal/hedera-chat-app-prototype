@@ -17,7 +17,7 @@ const AddDM = (props) => {
         console.log("AddDM useeffect");
         
         dataSocket.emit("getAllUsers", currentUser);
-        dataSocket.once("getAllUsers_response", allUsersList => {
+        dataSocket.on("getAllUsers_response", allUsersList => {
             console.log("AddDM: getAllUsers_response: ", allUsersList);
             setDmUserList(allUsersList);
             setAllUsers(allUsersList);
