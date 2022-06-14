@@ -306,16 +306,16 @@ const Login = (props) => {
             
             {/* username */}
             <div className='flex flex-row self-center mt-8'>
-                <div className='flex flex-col  justify-center mr-3'>
+                {/* <div className='flex flex-col  justify-center mr-3'>
                     <p className='text-white'>{userIdText}</p>
-                </div>
+                </div> */}
                 
                 <input
                     autoComplete={"off"}
-                    className=' w-56 h-12 bg-white mt'
+                    className=' w-64 h-12 bg-white mt'
                     type="text" 
                     name="name" 
-                    placeholder={loginType === "login" ? "enter username" : "enter new username"}
+                    placeholder={loginType === "login" ? "username" : "new username"}
                     value={usernameInputValue}
                     onChange={e => {
                         onChangeUsernameInput(e.target.value);
@@ -325,16 +325,16 @@ const Login = (props) => {
 
             {/* password */}
             <div className='flex flex-row self-center mt-8 mb-5'>
-                <div className='flex flex-col  justify-center mr-3'>
+                {/* <div className='flex flex-col  justify-center mr-3'>
                     <p className='text-white'>{passwordText}</p>
-                </div>
+                </div> */}
                 
                 <input
                     autoComplete={"off"}
-                    className=' w-56 h-12 bg-white mt'
+                    className=' w-64 h-12 bg-white mt'
                     type={"password"}
                     name="name" 
-                    placeholder={loginType === "login" ? "enter password" : "enter new password"}
+                    placeholder={loginType === "login" ? "password" : "new password"}
                     value={passwordInputValue}
                     onChange={e => {
                         onChangePasswordInput(e.target.value);
