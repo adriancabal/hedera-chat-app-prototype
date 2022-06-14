@@ -2,24 +2,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useState, useContext, useEffect } from 'react';
 import '../../App.css';
 import AppContext from "../../AppContext";
-// import { userMap, userList, groupChannelList, groupChannelMap } from '../../data';
 import AddIcon from '@mui/icons-material/Add';
 import CircleIcon from '@mui/icons-material/Circle';
-// import { set } from 'immer/dist/internal';
-// const mockUsers = ["user1", "user2", "user3", "user4", "user5", "user6", "user7", "user8", "user9", "user10", "user11", "user12", "user13", "user14", "user15", "user16", "user17", "user18", "user19", "user20", "user21", "user22", "user23", , "user24", "user25", "user26", "user27"];
 
 const SideBar = (props) => {
-    const {currentUser, dataSocket, userDms, setUserDms, myMessages} = useContext(AppContext);
-    // const currentUser = "user1";
+    const {currentUser, dataSocket, userDms, setUserDms, myMessages, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
     const userMap ={};
-    // const user = useSelector((state) => state.user.currentUser);
     const setMainWindow = props.setMainWindow;
-    const setCurrentDmUser = props.setCurrentDmUser;
-    // const myMessages = props.myMessages;
     console.log("Sidebar: myMessages: ", myMessages);
-    // const [userDms, setUserDms] = useState([]);
-    // const [_userMap, setUserMap] = useState(userMap);
-    // const [userDms, setUserDms] = useState(userMap[currentUser] ? userMap[currentUser].dms.map(dm => dm[0]) : []) ;
 
 
     useEffect(() => {
@@ -29,8 +19,6 @@ const SideBar = (props) => {
         dataSocket.once("getDMUsers_response", response => {
             // console.log("Sidebar: getDMUsers_response1: "+ response);
             console.log("Sidebar: getDMUsers_response: ", response);
-            // const dmUsers = JSON.parse(response).myDms;
-            // console.log("getDMUsers_response: ", dmUsers );
             setUserDms(response);
             
             // dataSocket.removeAllListeners("getDMUsers_response");
@@ -44,7 +32,17 @@ const SideBar = (props) => {
     }
 
     const onClickDmUser = (dmUser) => {
-        setCurrentDmUser(dmUser)
+        // if(dmUser.user !== currentDmUser.user){
+
+        // }
+        let _unreadMsgs = {...unreadMsgs};
+        if(_unreadMsgs[dmUser.channel]){
+            _unreadMsgs[dmUser.channel] = 0;
+        }
+        setUnreadMsgs(_unreadMsgs);
+        
+        setCurrentDmUser(dmUser);
+        console.log("sideBar: setCurrentDmUser: ", dmUser);
         setMainWindow("chatDM");
 
     }
@@ -92,10 +90,19 @@ const SideBar = (props) => {
                                         <CircleIcon className={`self-center ${userColor}`} fontSize=''/>
                                     </div>
                                 <p className='self-center text-white'>{user.user}</p>
-                                {  myMessages[user.channel] && myMessages[user.channel].unread &&
+                                {/* {  myMessages[user.channel] && myMessages[user.channel].unread && */}
+                                {unreadMsgs[user.channel] &&
                                     <div className='circle self-center ml-5 justify-center'>
                                         <p className='self-center text-white font-bold text-sm'>
-                                            {`${myMessages[user.channel].unread}`}
+                                            {`${unreadMsgs[user.channel] }`}
+                                            {/* {"9+"} */}
+                                        </p>
+                                    </div>
+                                }
+                                {!unreadMsgs[user.channel] &&
+                                    <div className='noNewMessage self-center ml-5 justify-center'>
+                                        <p className='self-center text-white font-bold text-sm'>
+                                            {/* {`${unreadMsgs[user.channel] }`} */}
                                             {/* {"9+"} */}
                                         </p>
                                     </div>

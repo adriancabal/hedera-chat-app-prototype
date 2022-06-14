@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import SendIcon from '@mui/icons-material/Send';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -8,8 +8,9 @@ import { TopicMessageSubmitTransaction} from "@hashgraph/sdk";
 import { newDm, sendDM } from '../../../helper/MessageMaker';
 // import { channelIndex, deletedChannelList } from '../../../data';
 import { MessageType } from '../../../constants';
-import { setDmChannelList, setDmChannelMap } from '../../../redux/channelsSlice';
-import { setUserMap } from '../../../redux/usersSlice';
+// import { setDmChannelList, setDmChannelMap } from '../../../redux/channelsSlice';
+// import { setUserMap } from '../../../redux/usersSlice';
+// import { set } from 'immer/dist/internal';
 const DATA_TOPIC_ID = process.env.REACT_APP_HEDERA_DATA_TOPIC_ID;
 const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
 
@@ -21,30 +22,85 @@ const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
 // ]
 
 const ChatWindow = (props) => {
-    const { currentUser, hederaClient, myMessages, setMyMessages, chatSocket } = useContext(AppContext);
+    const { currentUser, hederaClient, myMessages, setMyMessages, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
-    const { dataSocket, userDms} = useContext(AppContext);
+    const { dataSocket, userDms, setUserDms} = useContext(AppContext);
+    // const dmUser = props.currentDmUser;
     const [messageInputValue, setMessageInputValue] = useState("");
+    const [dmChannelMessagesMap, setDmChannelMessagesMap] = useState({});
+    const [dmChannelMsgIndexes, setDmChannelMsgIndexes] = useState([]);
+
+    useEffect(() => {
+        console.log("ChatWindow useeffect - dmUser: " + dmUser.user);
+        resetCurrentDmMessages();
+        chatSocket.emit("get_dm_channel_messages", {channel: dmUser.channel, user: currentUser});
+        chatSocket.on("getDmChannelMessagesResponse", dmMessagesMapResponse => {
+            console.log("getDmChannelMessagesResponse: ", dmMessagesMapResponse);
+            const dmMsgIndexes = Object.keys(dmMessagesMapResponse).reverse();
+            setDmChannelMessagesMap(dmMessagesMapResponse);
+            setDmChannelMsgIndexes(dmMsgIndexes);
+            // dataSocket.removeAllListeners("getDMUsers_response");
+        });
+        
+    }, [dmUser]);
+
+    useEffect(() => {
+        if(currentDmMessages.length > 0){
+            let _dmChannelMessagesMap = {...dmChannelMessagesMap};
+            let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
+            for(let i=0; i < currentDmMessages.length; i++){
+                const newMsg = currentDmMessages[i];
+                if(!_dmChannelMessagesMap[newMsg.index]){
+                    _dmChannelMessagesMap[newMsg.index] = {
+                        msg: newMsg.msg,
+                        sender: newMsg.sender,
+                        timestamp: newMsg.timestamp
+                    };
+                    _dmChannelMsgIndexes.unshift(newMsg.index);
+                    setDmChannelMessagesMap(_dmChannelMessagesMap);
+                    setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+                }
+            }
+        }
+    }, [currentDmMessages])
+
+
+    console.log("ChatWindow class function");
+    // if(currentDmMessages.length > 0){
+    //     let _dmChannelMessagesMap = {...dmChannelMessagesMap};
+    //     let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
+    //     for(let i=0; i < currentDmMessages.length; i++){
+    //         const newMsg = currentDmMessages[i];
+    //         if(!_dmChannelMessagesMap[newMsg.index]){
+    //             _dmChannelMessagesMap[newMsg.index] = {
+    //                 msg: newMsg.msg,
+    //                 sender: newMsg.sender,
+    //                 timestamp: newMsg.timestamp
+    //             };
+    //             _dmChannelMsgIndexes.unshift(newMsg.index);
+    //             setDmChannelMessagesMap(_dmChannelMessagesMap);
+    //             setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+    //         }
+    //     }
+    // }
+
+    if(dmChannelMsgIndexes.length && dmChannelMsgIndexes[dmChannelMsgIndexes.length -1] !== 0){
+        let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
+        _dmChannelMsgIndexes.push(0);
+        setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+    }
     // const myMessages = props.myMessages;
     // const setMyMessages = props.setMyMessages;
-    const dmUser = props.currentDmUser;
+    
     // const chatSocket = props.chatSocket; // move to context
     // const [users, setUsers] = useState(userMap);
     // const [_myMessages, setMyMessages] = useState(myMessages);
     console.log("ChatWindow: myMessages: ", myMessages);
-    // console.log("_myMessages2: ", myMessages[1]);
-    // const myDmChannel = findExistingDmChannel();
 
-    // const getDmChannel = () => {
-    //     let channel = -1;
-    //     userMap[currentUser].dms.forEach(dm => {
-    //         if(dm[0] === dmUser){
-    //             channel = dm[1];
-    //         }
-    //     });
-    //     return channel;
-    // }
+    
+
+
 
     // users[currentUser].dms.forEach(dm => {
     //     if(dm[0] === dmUser){
@@ -92,6 +148,7 @@ const ChatWindow = (props) => {
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
                     const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    // const isSuccess = true;
                     console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
                     if(isSuccess){
                         // let _dmChannelMap = {...dmChannelMap};
@@ -116,35 +173,62 @@ const ChatWindow = (props) => {
                         // setChannelIndexMax(newChannel);
                         
                         // send DM message
-                        let _myMessages = {...myMessages};
-                        _myMessages[newChannel] = {
-                            type: MessageType.DM,
-                            msgMap: {},
-                            msgList: [0],
-                            unread: 0,
-                        };
-                        // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                        let _dmChannelMessagesMap = {...dmChannelMessagesMap};
+                        let _dmChannelMsgIndexes = [0];
                         const timestamp = new Date().getTime();
+                        _dmChannelMessagesMap[1] = {
+                            timestamp: timestamp,
+                            msg: messageInputValue,
+                            sender: currentUser,
+                        }
+                        _dmChannelMsgIndexes.unshift(1);
                         const messageString = sendDM(newChannel, currentUser, messageInputValue, 1, timestamp);
+                        const messageDm = {
+                            messageString: messageString,
+                            dmUser: dmUser.user,
+                        };
+                        chatSocket.emit("send_message_dm", messageDm);
+                        setDmChannelMessagesMap(_dmChannelMessagesMap);
+                        setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+                        setMessageInputValue("");
+                        const _userDms = [...userDms];
+                        _userDms.push({
+                            user: dmUser.user,
+                            channel: newChannel,
+                            isLoggedIn: dmUser.isLoggedIn,
+                        });
+                        setUserDms(_userDms);
+                        // let _myMessages = {...myMessages};
+                        // _myMessages[newChannel] = {
+                        //     type: MessageType.DM,
+                        //     msgMap: {},
+                        //     msgList: [0],
+                        //     unread: 0,
+                        // };
+                        // const currentMessageIndex = myMessages[dmUser].msgList.length;
+                        // const timestamp = new Date().getTime();
+                       
                         const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                        // const isSendChatMsgSuccess = true;
                         console.log("send first message Success: " + isSendChatMsgSuccess);
                         // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
                         // const isSendChatMsgSuccess = true;
                         if(isSendChatMsgSuccess){
+                            console.log(`successfully sent first message to ${dmUser.user}`);
                             // const currentMessageIndex = myMessages[dmUser].msgList.length;
-                            _myMessages[newChannel].msgMap[1] = {
-                                timestamp: timestamp,
-                                msg: messageInputValue,
-                                sender: currentUser,
-                            };
-                            _myMessages[newChannel].msgList.unshift(1);
-                            const messageDm = {
-                                messageString: messageString,
-                                dmUser: dmUser.user,
-                            };
-                            chatSocket.emit("send_message_dm", messageDm);
-                            setMyMessages(_myMessages);
-                            setMessageInputValue("");
+                            // _myMessages[newChannel].msgMap[1] = {
+                            //     timestamp: timestamp,
+                            //     msg: messageInputValue,
+                            //     sender: currentUser,
+                            // };
+                            // _myMessages[newChannel].msgList.unshift(1);
+                            // const messageDm = {
+                            //     messageString: messageString,
+                            //     dmUser: dmUser.user,
+                            // };
+                            // chatSocket.emit("send_message_dm", messageDm);
+                            // setMyMessages(_myMessages);
+                            // setMessageInputValue("");
                         }
                     }
                     else {
@@ -220,46 +304,60 @@ const ChatWindow = (props) => {
                 console.log("existingDmChannel: ", existingDMChannel);
                 const dmChannel = existingDMChannel < 0 ? 0 : existingDMChannel;
                 console.log("dmChannel: ", dmChannel);
-                console.log("myMessages: ", myMessages);
-                let _myMessages = {...myMessages};
-                const currentMessageIndex = _myMessages[dmChannel].msgList.length;
+                // console.log("myMessages: ", myMessages);
+                // let _myMessages = {...myMessages};
+                let _dmChannelMessagesMap = {...dmChannelMessagesMap};
+                let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
+                const currentMessageIndex = _dmChannelMsgIndexes.length;
+                // const currentMessageIndex = _myMessages[dmChannel].msgList.length;
                 const timestamp = new Date().getTime();
                 const messageString = sendDM(dmChannel, currentUser, messageInputValue, currentMessageIndex, timestamp);
                 
                 console.log("sendChatMsgSuccess to existing dmuser");
-                _myMessages[dmChannel].msgMap[currentMessageIndex] = {
+                
+                _dmChannelMessagesMap[currentMessageIndex] = {
                     timestamp: timestamp,
                     msg: messageInputValue,
                     sender: currentUser,
-                };
-                _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
+                }
+                _dmChannelMsgIndexes.unshift(currentMessageIndex);
+                
+                // _myMessages[dmChannel].msgMap[currentMessageIndex] = {
+                //     timestamp: timestamp,
+                //     msg: messageInputValue,
+                //     sender: currentUser,
+                // };
+                // _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
                 const messageDm = {
                     messageString: messageString,
                     dmUser: dmUser.user,
                 };
                 chatSocket.emit("send_message_dm", messageDm);
+                setDmChannelMessagesMap(_dmChannelMessagesMap);
+                setDmChannelMsgIndexes(_dmChannelMsgIndexes);
                 setMessageInputValue("");
-                setMyMessages(_myMessages);
+                // setMyMessages(_myMessages);
                 
                 
                 const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
-                console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
-                // if(isSendChatMsgSuccess){
-                //     console.log("sendChatMsgSuccess to existing dmuser");
-                //     _myMessages[dmChannel].msgMap[currentMessageIndex] = {
-                //         timestamp: timestamp,
-                //         msg: messageInputValue,
-                //         sender: currentUser,
-                //     };
-                //     _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
-                //     const messageDm = {
-                //         messageString: messageString,
-                //         dmUser: dmUser.user,
-                //     };
-                //     chatSocket.emit("send_message_dm", messageDm);
-                //     setMessageInputValue("");
-                //     setMyMessages(_myMessages);
-                // }
+                // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
+
+                if(isSendChatMsgSuccess){
+                    console.log("sendChatMsgSuccess to existing dmuser");
+                    // _myMessages[dmChannel].msgMap[currentMessageIndex] = {
+                    //     timestamp: timestamp,
+                    //     msg: messageInputValue,
+                    //     sender: currentUser,
+                    // };
+                    // _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
+                    // const messageDm = {
+                    //     messageString: messageString,
+                    //     dmUser: dmUser.user,
+                    // };
+                    // chatSocket.emit("send_message_dm", messageDm);
+                    // setMessageInputValue("");
+                    // setMyMessages(_myMessages);
+                }
             }
         }
     }
@@ -329,11 +427,11 @@ const ChatWindow = (props) => {
                 
                 {
                     // myMessages[dmUser.channel].msgList.map(messageIndex => {
-                        
-                    messages.map(messageIndex => {
+                    // messages.map(messageIndex => {
+                    dmChannelMsgIndexes.map(messageIndex => {
                         
                         // const myMessage = myMessages[dmUser.channel].msgMap[messageIndex];
-                        let myMessage = dmMsgMap[messageIndex];
+                        let myMessage = dmChannelMessagesMap[messageIndex];
                         if(messageIndex === 0){
                             myMessage = {
                                msg: `*** Beginning of your chat history with ${dmUser.user} ***`,
@@ -380,7 +478,7 @@ const ChatWindow = (props) => {
                     })
                 }
                 {
-                    !myMessages[dmUser.channel] && 
+                    Object.keys(dmChannelMessagesMap).length === 0 && 
                     <div className="flex w-full border-t-[0px] border-[gray] p-2 pt-4">
                         <div className='flex flex-row w-full h-8'>
                             <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>

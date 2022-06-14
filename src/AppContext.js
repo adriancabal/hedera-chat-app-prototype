@@ -24,6 +24,13 @@ const AppContext = createContext();
     const [chatSocket, setChatSocket] = useState(null);
     const [dataSocket, setDataSocket] = useState(null);
     const [userDms, setUserDms] = useState([]);
+    const [currentDmMessages, setCurrentDmMessages] = useState([]);
+    const [unreadMsgs, setUnreadMsgs]= useState({})
+    const [currentDmUser, setCurrentDmUser] = useState({});
+
+    const resetCurrentDmMessages = () => {
+        setCurrentDmMessages([]);
+    }
 
     const setChannelIndexMax = (index) => {
         if(index > channelIndex){
@@ -35,6 +42,8 @@ const AppContext = createContext();
         <AppContext.Provider
             value={{
                 currentUser, 
+                currentDmUser,
+                currentDmMessages,
                 userMap, 
                 userList,
                 dmChannelMap, 
@@ -48,7 +57,11 @@ const AppContext = createContext();
                 chatSocket,
                 dataSocket,
                 userDms,
+                unreadMsgs,
                 setCurrentUser,
+                setCurrentDmUser,
+                setCurrentDmMessages,
+                resetCurrentDmMessages,
                 setChatSocket,
                 setDataSocket,
                 setMyMessages,
@@ -62,6 +75,7 @@ const AppContext = createContext();
                 setDeletedChannelList,
                 setChannelIndexMax,
                 setUserDms,
+                setUnreadMsgs,
             }}
         >
             {children}

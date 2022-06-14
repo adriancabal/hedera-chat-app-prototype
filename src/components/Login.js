@@ -1,4 +1,5 @@
 import { useState, useContext, useRef } from 'react';
+import logo from '../logo.svg';
 import { setUser } from "../redux/userSlice";
 import { setUserList, setUserMap } from "../redux/usersSlice";
 import { UserAction } from '../constants';
@@ -33,6 +34,7 @@ const Login = (props) => {
     const [usernameInputValue, setUsernameInputValue] = useState("");
     const [passwordInputValue, setPasswordInputValue] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const modalColor = loginType === "login" ? "bg-[blue]" : "bg-[green]";
     const userIdText = loginType === "login" ? "username" : "set Username";
@@ -57,49 +59,52 @@ const Login = (props) => {
         }else if(loginType === "create"){
             //call add new user contract method
             const isUsernameAvailable = await checkUsernameAvailability();
-            if(!isUsernameAvailable){
-                setErrorMessage("User already exists.")
-            }else {
-                await createNewAccount();
-            }
+            console.log("onClickSubmit: isUsernameAvailable: ", isUsernameAvailable);
+            // if(!isUsernameAvailable){
+            //     setErrorMessage("User already exists.")
+            // }else {
+            //     await createNewAccount();
+            // }
         }
     }
 
     const authenticateUserLogin = async () => {
         console.log("authenticateUserLogin...");
+        setIsLoading(true);
         //1. authenticate user
         // dataSocket.emit("authenticate", {user: usernameInputValue, pw: passwordInputValue, timestamp: new Date().getTime()});
         dataSocket.on("authenticate_response", async (response) => {
             console.log("authenticate_response: ", response);
+            setIsLoading(false);
             if(response.isAuthorized){
-                // setCurrentUser(usernameInputValue);
-                // setErrorMessage("");
-                // setDmChannelList(response.userDmChannels);
-                const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
-                    {
-                    withCredentials: true, 
-                    extraHeaders: {
-                      "hedera-chat-message": "abcd",
-                    }
-                  }
-                );
-                setChatSocket(_chatSocket);
+                setCurrentUser(usernameInputValue);
+                setErrorMessage("");
+                setDmChannelList(response.userDmChannels);
+                // const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+                //     {
+                //     withCredentials: true, 
+                //     extraHeaders: {
+                //       "hedera-chat-message": "abcd",
+                //     }
+                //   }
+                // );
+                // setChatSocket(_chatSocket);
                 
-                _chatSocket.on("get_init_msg_load_response", msgLoad => {
-                    console.log("chatSocketMessageLoadResponse: ", msgLoad);
-                    setMyMessages(msgLoad);
-                    setCurrentUser(usernameInputValue);
-                    setErrorMessage("");
-                    setDmChannelList(response.userDmChannels);
+                // _chatSocket.on("get_init_msg_load_response", msgLoad => {
+                //     console.log("chatSocketMessageLoadResponse: ", msgLoad);
+                //     setMyMessages(msgLoad);
+                //     setCurrentUser(usernameInputValue);
+                //     setErrorMessage("");
+                //     setDmChannelList(response.userDmChannels);
 
 
-                });
-                const initialMsgLoadData = {
-                    user: usernameInputValue,
-                    channels: response.userDmChannels,
-                };
-                console.log("emit: get_init_msg_load: ", initialMsgLoadData);
-                _chatSocket.emit("get_init_msg_load", initialMsgLoadData);
+                // });
+                // const initialMsgLoadData = {
+                //     user: usernameInputValue,
+                //     channels: response.userDmChannels,
+                // };
+                // console.log("emit: get_init_msg_load: ", initialMsgLoadData);
+                // _chatSocket.emit("get_init_msg_load", initialMsgLoadData);
 
                 // dataSocket.removeAllListeners("authenticate");
                 if(!response.isCurrentlyLoggedIn){
@@ -114,6 +119,7 @@ const Login = (props) => {
                 }
             }
             else {
+                
                 setErrorMessage("Invalid credentials. Try again.");
             }
         });
@@ -181,11 +187,22 @@ const Login = (props) => {
     // }
 
     const checkUsernameAvailability = async () => {
+        setIsLoading(true);
         console.log("checkUsernameAvailability...");
-        if(userMap[usernameInputValue]){
-            return false;
-        }
-        return true;
+        dataSocket.on("isUsernameAvailable_response", async (response) => {
+            console.log("isUsernameAvailable_response: " + response);
+            if(response === false){
+                setIsLoading(false);
+                setErrorMessage("User already exists.")
+            }else {
+                await createNewAccount();
+            }
+        });
+        dataSocket.emit("isUsernameAvailable", usernameInputValue);
+        // if(userMap[usernameInputValue]){
+        //     return false;
+        // }
+        // return true;
 
         // const contractQuery = await new ContractCallQuery()
         //     .setGas(100000)
@@ -215,24 +232,27 @@ const Login = (props) => {
         const createNewAccountSuccess = getReceipt.status._code === 22 ;
         console.log("getReceiptStatusTypeOf: ", getReceipt.status);
         // const isSuccess = await sendDataTopicMessage(hederaClient, );
+        setIsLoading(false);
         if(createNewAccountSuccess){
             console.log("createNewAccountSuccess!");
-            if(!userMap[usernameInputValue]){
-                console.log("new user doesn't exist in userMap");
-                // let userMapTemp = {...userMap};
-                userMap[usernameInputValue] = {
-                    pw: passwordInputValue, 
-                    channels: [],
-                    isLoggedIn: false,
-                };
-                // let userListTemp = [...userList];
-                userList.push(usernameInputValue);
-                // dispatch(setUserMap(userMapTemp));
-                // dispatch(setUserList(userListTemp));
-            }
+            // if(!userMap[usernameInputValue]){
+            //     console.log("new user doesn't exist in userMap");
+            //     // let userMapTemp = {...userMap};
+            //     userMap[usernameInputValue] = {
+            //         pw: passwordInputValue, 
+            //         channels: [],
+            //         isLoggedIn: false,
+            //     };
+            //     // let userListTemp = [...userList];
+            //     userList.push(usernameInputValue);
+            //     // dispatch(setUserMap(userMapTemp));
+            //     // dispatch(setUserList(userListTemp));
+            // }
             console.log("finalize createNewAccountSuccess");
             props.setNewAccountCreated(true);
             setLoginType("login");
+            setUsernameInputValue('');
+            setPasswordInputValue('');
             setErrorMessage("");
         }
 
@@ -268,12 +288,22 @@ const Login = (props) => {
 
     return (
         <div className={`flex flex-col ${modalColor} h-96 w-96 rounded-xl`}>
+            {   isLoading &&
+                <img src={logo} className="App-logo" alt="logo" />
+            }
+
+            {
+            !isLoading &&
+            <>
             <p className='self-center text-3xl text-white mt-8'>
                 {loginType === "login" ? "Login" : "New User"}
             </p>
 
             {/* Inputs */}
-
+            
+            
+            
+            
             {/* username */}
             <div className='flex flex-row self-center mt-8'>
                 <div className='flex flex-col  justify-center mr-3'>
@@ -342,6 +372,10 @@ const Login = (props) => {
                     
                 </p>
             </div>
+
+            </>
+
+            }
             
         </div>
     )

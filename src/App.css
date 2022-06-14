@@ -3,7 +3,8 @@
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 20vmin;
+  /* height: 40vmin; */
   pointer-events: none;
 }
 
@@ -115,4 +116,10 @@
   height: 20px;
   background-color: red;
   border-radius: 40%;
+}
+
+.noNewMessage {
+  display: flex;
+  width: 30px;
+  height: 20px;
 }

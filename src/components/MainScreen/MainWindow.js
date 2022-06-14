@@ -6,7 +6,7 @@ import ChatWindow from "./MainWindowComponents/ChatWindow";
 const MainWindow = (props) => {
     const mainWindow = props.mainWindow;
     const currentDmUser = props.currentDmUser;
-    const setCurrentDmUser = props.setCurrentDmUser;
+    // const setCurrentDmUser = props.setCurrentDmUser;
     // const myMessages = props.myMessages;
     // const setMyMessages = props.setMyMessages;
     // const chatSocket = props.chatSocket;
@@ -21,7 +21,7 @@ const MainWindow = (props) => {
 
             {/* Add DM */}
             {
-               mainWindow === "addDM" && <AddDM setMainWindow={props.setMainWindow} setCurrentDmUser={setCurrentDmUser} />
+               mainWindow === "addDM" && <AddDM setMainWindow={props.setMainWindow} />
             }   
             {/* Add Group */}
 

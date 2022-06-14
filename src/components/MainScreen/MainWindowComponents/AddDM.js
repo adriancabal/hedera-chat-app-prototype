@@ -5,13 +5,13 @@ import AppContext from "../../../AppContext";
 // import { userList, userMap } from "../../../data";
 
 const AddDM = (props) => {
-    const { currentUser, dataSocket, userList, userMap } = useContext(AppContext);
+    const { currentUser, dataSocket, userList, userMap,  setCurrentDmUser} = useContext(AppContext);
     const [searchInputValue, setSearchInputValue] = useState("");
     const [allUsers, setAllUsers] = useState([]);
     const [dmUserList, setDmUserList] = useState(allUsers);
     const [offlineUserColor, setOfflineUserColor] = useState([null]);
     const setMainWindow = props.setMainWindow;
-    const setCurrentDmUser = props.setCurrentDmUser;
+    // const setCurrentDmUser = props.setCurrentDmUser;
 
     useEffect(() => {
         console.log("AddDM useeffect");

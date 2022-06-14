@@ -14,17 +14,20 @@ import { CHAT_SERVER_ENDPOINT, MessageType } from "../constants";
 // import { dmChannelMap, userMap } from "../data"
 
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
-
+let dmUserSelected = null;
+let currentUserDms = [];
+let currentUnreadMsgs = {};
 const MainChatScreen = (props) => {
     // const dispatch = useDispatch();
-    const {currentUser, setCurrentUser, hederaClient, dmChannelList, dataSocket, setUserDms, myMessages, setMyMessages, chatSocket } = useContext(AppContext);
+    const {currentUser, setCurrentUser, hederaClient, dataSocket, userDms, setUserDms, myMessages, setMyMessages, chatSocket, setChatSocket} = useContext(AppContext);
+    const {currentDmMessages, setCurrentDmMessages, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
     // const currentUser = "user1";
     // const { currentUser, setCurrentUser, hederaClient, userMap, dmChannelMap} = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
     // const socket = useSelector((state) => state.user.socket);
     const [mainWindow, setMainWindow] = useState("all");
-    const [currentDmUser, setCurrentDmUser] = useState(null);
+    // const [currentDmUser, setCurrentDmUser] = useState(null);
     // const [myMessages, setMyMessages] = useState({});
     // const [myMessages, setMyMessages] = useState([]);
     // const [chatSocket, setChatSocket] = useState(null);
@@ -46,6 +49,19 @@ const MainChatScreen = (props) => {
             // dispatch(setUser(""));
         }
     }
+
+    useEffect(() => { 
+        dmUserSelected = currentDmUser;
+    }, [currentDmUser]);
+
+    useEffect(() => { 
+        currentUserDms = userDms;
+    }, [userDms]);
+
+    useEffect(() => { 
+        currentUnreadMsgs = unreadMsgs;
+    }, [unreadMsgs]);
+    
 
     useEffect(() => { 
         const myAccountId = process.env.REACT_APP_MY_ACCOUNT_ID;
@@ -74,16 +90,17 @@ const MainChatScreen = (props) => {
         // }
        
         // move to app.js
-        // const socket = socketIOClient(CHAT_SERVER_ENDPOINT, 
-        //     {
-        //     withCredentials: true, 
-        //     extraHeaders: {
-        //       "hedera-chat-message": "abcd",
-        //     }
-        //   }
-        // );
+        const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+            {
+            withCredentials: true, 
+            extraHeaders: {
+              "hedera-chat-message": "abcd",
+            }
+          }
+        );
+        _chatSocket.emit("join_chat_room", currentUser);
         
-        // setChatSocket(socket);
+        setChatSocket(_chatSocket);
         // socket.once("get_init_msg_load_response", msgLoad => {
         //     console.log("get_init_msg_load_response: ", msgLoad);
         //     setMyMessages(msgLoad);
@@ -108,7 +125,7 @@ const MainChatScreen = (props) => {
         //     chatMessageController(messageAsString);
         // });
 
-        chatSocket.on("receive_message", message => {
+        _chatSocket.on("receive_message", message => {
             console.log("on chatMessages...");
             // console.log("messageTimestamp: ", message.consensusTimestamp.seconds.low);
             chatMessageController(message);
@@ -136,65 +153,96 @@ const MainChatScreen = (props) => {
         // console.log("messageSentTimestamp: ", new Date(timestamp));
 
         if(msgType === MessageType.DM){
+            console.log("channel: " + channel);
+            console.log("currentDmUser: ", dmUserSelected);
+            console.log("currentDmUser.channel: " + channel + ", " + dmUserSelected.channel) ;
+            if(channel === dmUserSelected.channel){
+               let _currentDmMsgs = [...currentDmMessages];
+               _currentDmMsgs.push({
+                   channel: channel,
+                   index: index,
+                   msg:msg,
+                   sender: sender,
+                   timestamp: timestamp,
+               });
+               console.log("chat-message-push-current: ", _currentDmMsgs );
+               setCurrentDmMessages(_currentDmMsgs);
+            }else {
+                let _userDms = [...currentUserDms];
+                console.log("chatSocket: currentUserDms: ", _userDms);
+                let _userDmUsers = _userDms.map(userDm => userDm.user);
+                if(!_userDmUsers.includes(sender)){
+                    console.log("chatSocket: newUserDm");
+                    _userDms.push({
+                        user: sender,
+                        channel: channel,
+                        isLoggedIn: true,
+                    });
+                    console.log("chatSocket: setUserDms: ", _userDms);
+                    setUserDms(_userDms);
+                }
+                let _unreadMsgs = {...currentUnreadMsgs};
+                if(!_unreadMsgs[channel]){
+                    _unreadMsgs[channel] = 1;
+                }
+                else {
+                    _unreadMsgs[channel] += 1;
+                }
+                setUnreadMsgs(_unreadMsgs);
+            }
             // const dmChannelUsers = dmChannelMap[channel].users;
             // console.log("dmChannelUsers: ", dmChannelUsers);
             // if(dmChannelUsers[0] === currentUser || dmChannelUsers[1] === currentUser){
-            console.log("ChatController: myMessages: ", myMessages);
-            let _myMessages = {...myMessages};
-            console.log("ChatController: _myMessages: ", _myMessages);
+            // console.log("ChatController: myMessages: ", myMessages);
+            // let _myMessages = {...myMessages};
+            // console.log("ChatController: _myMessages: ", _myMessages);
             // if channel exists but message index doesn't exist
-            if(_myMessages[channel] && !_myMessages[channel].msgMap[index]){
-                console.log("chatController: channel exists but message index doesn't exist");
-                // let _myMessages = {...myMessages};
-                _myMessages[channel].msgMap[index] = {
-                    timestamp: timestamp,
-                    msg: msg,
-                    sender: sender,
-                }
-                _myMessages[channel].msgList.unshift(index);
-                _myMessages[channel].unread += 1;
-                console.log("_myMessagesAfterAddIndex: " , _myMessages);
-                setMyMessages(_myMessages);
-            }
+            // if(_myMessages[channel] && !_myMessages[channel].msgMap[index]){
+            //     console.log("chatController: channel exists but message index doesn't exist");
+            //     // let _myMessages = {...myMessages};
+            //     _myMessages[channel].msgMap[index] = {
+            //         timestamp: timestamp,
+            //         msg: msg,
+            //         sender: sender,
+            //     }
+            //     _myMessages[channel].msgList.unshift(index);
+            //     _myMessages[channel].unread += 1;
+            //     console.log("_myMessagesAfterAddIndex: " , _myMessages);
+            //     setMyMessages(_myMessages);
+            // }
             // if channel doesn't yet exist
-            else if(!_myMessages[channel]){
-                console.log(`chatController:channel doesn't yet exist: ${channel}`);
-                // get updated dmUsers
-                dataSocket.emit("getDmUsers", currentUser);
-                dataSocket.once("getDMUsers_response", response => {
-                    console.log("MainChatScreen: getDMUsers_response: ", response);
-                    setUserDms(response);
-                    _myMessages[channel] = {
-                        msgMap: {},
-                        msgList: [],
-                        unread: 1,
-                    };
-                    _myMessages[channel].msgMap[index] = {
-                        timestamp: timestamp,
-                        msg: msg,
-                        sender: sender,
-                    };
-                    _myMessages[channel].msgList.unshift(index);
-                    setMyMessages(_myMessages);
-                });
-                // _myMessages[channel] = {
-                //     msgMap: {},
-                //     msgList: [],
-                //     unread: 1,
-                // };
-                // _myMessages[channel].msgMap[index] = {
-                //     timestamp: timestamp,
-                //     msg: msg,
-                //     sender: sender,
-                // };
-                // _myMessages[channel].msgList.unshift(index);
-                // setMyMessages(_myMessages);
-            }
+            // else if(!_myMessages[channel]){
+            //     console.log(`chatController:channel doesn't yet exist: ${channel}`);
+            //     // get updated dmUsers
+                
+            //     const _userDms = [...userDms];
+            //     _userDms.push({
+            //         channel: channel,
+            //         user: sender,
+            //         isLoggedIn: true,
+            //     });
+
+            //     _myMessages[channel] = {
+            //         msgMap: {},
+            //         msgList: [],
+            //         unread: 1,
+            //     };
+
+            //     _myMessages[channel].msgMap[index] = {
+            //         timestamp: timestamp,
+            //         msg: msg,
+            //         sender: sender,
+            //     };
+            //     _myMessages[channel].msgList.unshift(index);
+            //     setUserDms(_userDms);
+            //     setMyMessages(_myMessages);
+
+            // }
         }
         else if(msgType === MessageType.GROUP){
 
         }
-        console.log("myMessages: ", myMessages);
+        // console.log("myMessages: ", myMessages);
     }
 
     
@@ -224,7 +272,7 @@ const MainChatScreen = (props) => {
             {/* Main View */}
             <div className={`flex flex-row  h-[92%] w-[1000px]`}>
                 {/* Scoll sidebar */}
-                <SideBar setMainWindow={setMainWindow} setCurrentDmUser={setCurrentDmUser} />
+                <SideBar setMainWindow={setMainWindow} />
                 {/* <SideBar setMainWindow={setMainWindow} setCurrentDmUser={setCurrentDmUser} myMessages={myMessages}/> */}
 
                 {/* Main Window */}
