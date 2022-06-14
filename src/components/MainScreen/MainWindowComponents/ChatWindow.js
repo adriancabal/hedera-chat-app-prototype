@@ -14,12 +14,7 @@ import { MessageType } from '../../../constants';
 const DATA_TOPIC_ID = process.env.REACT_APP_HEDERA_DATA_TOPIC_ID;
 const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
 
-// const messagesMock = [
-//     {message: "are you good?", timestamp: "4:31pm", sender: "user2"},
-//     {message: "hello", timestamp: "4:30pm", sender: "user1"},
-//     {message: "what's up fdsjhfjdkhkdfsdkjhfdjhfjfhjfshfjkdhfsjkhfjfhsjfhfjshfsjkfhsjfhsdjfhkjfhsddkjfhsdjfhskjhfsjkfhsjkhfjkdhfkshfjshfshjhfkjshfhfjkfhsjkhfsdjkhfskdfadrianrodeabike", 
-//     timestamp: "4:30pm", sender: "user2"},
-// ]
+const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const ChatWindow = (props) => {
     const { currentUser, hederaClient, myMessages, setMyMessages, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
@@ -445,6 +440,10 @@ const ChatWindow = (props) => {
                         let hours;
                         let minutes;
                         let meridian;
+                        let month;
+                        let dayOfWeek;
+                        let dayOfMonth;
+                        let year;
                         if(sender){
                             messageTimestamp = myMessage.timestamp;
                             date = new Date(messageTimestamp);
@@ -453,6 +452,12 @@ const ChatWindow = (props) => {
                             minutes = date.getMinutes();
                             minutes = minutes < 10 ? "0" + minutes : minutes;
                             meridian = date.getHours() < 12 ? "am" : "pm";
+
+                            dayOfWeek = date.getDay();
+                            dayOfMonth = date.getDate();
+                            month = date.getMonth();
+                            year = date.getFullYear();
+
                         }
 
                         
@@ -462,9 +467,13 @@ const ChatWindow = (props) => {
                             <div className="flex flex-col w-full border-t-[1px] border-[gray] p-2">
                                 {
                                     !!sender &&
-                                    <div className='flex flex-row w-full h-8'>
+                                    <div className='flex flex-row w-full h-8 '>
                                         <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
                                         <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
+                                        <div className='flex flex-row ml-2 grow justify-end '>
+                                            <p className={`text-white `}>{`${DAYS_OF_WEEK[dayOfWeek]}, ${month+1}-${dayOfMonth}-${year}`}</p>
+                                        </div>
+                                        
                                     </div>
                                 }
                                 
