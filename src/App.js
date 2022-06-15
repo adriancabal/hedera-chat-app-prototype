@@ -26,7 +26,7 @@ import AppContext from './AppContext';
 // const ENDPOINT = "http://localhost:4420";
 // const ENDPOINT = "http://6sqacqd9utbnvdvvks7tcnhngc.palmito.duckdns.org:4420";
 // const ENDPOINT = "http://f5s1hiq9pl819avjp4igvler3g.palmito.duckdns.org:4420";
-const ENDPOINT = "http://f5s1hiq9pl819avjp4igvler3g.palmito.duckdns.org/";
+const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 // let outerUserMap ={};
