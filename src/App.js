@@ -23,7 +23,9 @@ import AppContext from './AppContext';
 //   deletedChannelList,
 //   channelIndex,
 // } from './data';
-const ENDPOINT = "http://localhost:4420";
+// const ENDPOINT = "http://localhost:4420";
+const ENDPOINT = "http://6sqacqd9utbnvdvvks7tcnhngc.palmito.duckdns.org:4420";
+
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 // let outerUserMap ={};

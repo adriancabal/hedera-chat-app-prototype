@@ -74,20 +74,6 @@ const MainChatScreen = (props) => {
         // Establish client connection
         const hederaClient = Client.forTestnet();
         hederaClient.setOperator(myAccountId, myPrivateKey);
-        // if(currentUser && userMap[currentUser]){
-        //     userMap[currentUser].dms.forEach(dm => {
-        //         myMessages[dm[1]] = {
-        //             type: MessageType.DM,
-        //             msgMap: {
-        //                 0: {
-        //                     msg: `Beginning of your chat history with ${dm[0]}...`,
-        //                     type: 1,
-        //                 },
-        //             },
-        //             msgList: [0],
-        //         };
-        //     });
-        // }
        
         // move to app.js
         const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
@@ -101,29 +87,6 @@ const MainChatScreen = (props) => {
         _chatSocket.emit("join_chat_room", currentUser);
         
         setChatSocket(_chatSocket);
-        // socket.once("get_init_msg_load_response", msgLoad => {
-        //     console.log("get_init_msg_load_response: ", msgLoad);
-        //     setMyMessages(msgLoad);
-        // });
-        // const initialMsgLoadData = {
-        //     user: currentUser,
-        //     channels: dmChannelList,
-        // };
-        // console.log("emit: get_init_msg_load: ", initialMsgLoadData);
-        // socket.emit("get_init_msg_load", initialMsgLoadData);
-
-        
-
-        // socket.on("ChatMessages", message => {
-        //     console.log("on chatMessages...");
-        //     // console.log("messageTimestamp: ", message.consensusTimestamp.seconds.low);
-        //     const messageAsString = Buffer.from(message.contents, "utf8").toString();
-        //     // const _myMessages= [...myMessages];
-        //     // _myMessages.push(messageAsString);
-        //     // setMyMessages(_myMessages);
-        //     // console.log("myMessages: ", myMessages);
-        //     chatMessageController(messageAsString);
-        // });
 
         _chatSocket.on("receive_message", message => {
             console.log("on chatMessages...");
