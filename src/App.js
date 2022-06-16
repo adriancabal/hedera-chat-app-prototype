@@ -88,7 +88,7 @@ const App = () => {
 
     console.log("initializingDataTopicConnection...");
     
-    const _dataSocket = socketIOClient(ENDPOINT
+    const _dataSocket = socketIOClient("http://fhh3nvjc25efbd71se4kga62c4.ingress.bdl.computer"
       // {
       //   withCredentials: true, 
       //   extraHeaders: {
