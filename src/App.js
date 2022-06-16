@@ -25,7 +25,7 @@ import AppContext from './AppContext';
 // } from './data';
 // const ENDPOINT = "http://localhost:4420";
 // const ENDPOINT = "http://6sqacqd9utbnvdvvks7tcnhngc.palmito.duckdns.org:4420";
-const ENDPOINT = "http://i61ngaqqq1aqd9ujs91q9ptbl0.palmito.duckdns.org:4420";
+const ENDPOINT = "http://f7cta58a15bn717ne59srt2loc.palmito.duckdns.org:4420";
 // const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
