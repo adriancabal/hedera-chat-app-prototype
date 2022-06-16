@@ -25,8 +25,8 @@ import AppContext from './AppContext';
 // } from './data';
 // const ENDPOINT = "http://localhost:4420";
 // const ENDPOINT = "http://6sqacqd9utbnvdvvks7tcnhngc.palmito.duckdns.org:4420";
-// const ENDPOINT = "http://f5s1hiq9pl819avjp4igvler3g.palmito.duckdns.org:4420";
-const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
+const ENDPOINT = "http://i61ngaqqq1aqd9ujs91q9ptbl0.palmito.duckdns.org:4420";
+// const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 // let outerUserMap ={};
@@ -88,14 +88,14 @@ const App = () => {
 
     console.log("initializingDataTopicConnection...");
     
-    const _dataSocket = socketIOClient(ENDPOINT, 
-      {
-        withCredentials: true, 
-        extraHeaders: {
-          "hedera-chat-app": "abcd",
-          // 'Access-Control-Allow-Credentials': true,
-        }
-      }
+    const _dataSocket = socketIOClient(ENDPOINT
+      // {
+      //   withCredentials: true, 
+      //   extraHeaders: {
+      //     "hedera-chat-app": "abcd",
+      //     // 'Access-Control-Allow-Credentials': true,
+      //   }
+      // }
     );
 
     setDataSocket(_dataSocket);
