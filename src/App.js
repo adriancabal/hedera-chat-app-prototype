@@ -24,8 +24,8 @@ import AppContext from './AppContext';
 //   channelIndex,
 // } from './data';
 // const ENDPOINT = "http://localhost:5000";
-const ENDPOINT = "http://pacific-spire-35776.herokuapp.com";
-// const ENDPOINT = "http://6sqacqd9utbnvdvvks7tcnhngc.palmito.duckdns.org:4420";
+// const ENDPOINT = "http://pacific-spire-35776.herokuapp.com";
+const ENDPOINT = "http://fkbsjdh1cpc8vass5ou8mqtppk.d3akash.cloud";
 // const ENDPOINT = "http://fhh3nvjc25efbd71se4kga62c4.ingress.bdl.computer";
 // const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
 // const DATA_TOPIC_ID = "0.0.34717180";
