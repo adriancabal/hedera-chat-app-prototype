@@ -23,7 +23,7 @@ import AppContext from './AppContext';
 //   deletedChannelList,
 //   channelIndex,
 // } from './data';
-// const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = "http://localhost:4420";
 // const ENDPOINT = "http://pacific-spire-35776.herokuapp.com";
 const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const ENDPOINT = "http://fhh3nvjc25efbd71se4kga62c4.ingress.bdl.computer";
@@ -89,14 +89,14 @@ const App = () => {
 
     console.log("initializingDataTopicConnection...");
     
-    const _dataSocket = socketIOClient(ENDPOINT
-      // {
-      //   withCredentials: true, 
-      //   extraHeaders: {
-      //     "hedera-chat-app": "abcd",
-      //     // 'Access-Control-Allow-Credentials': true,
-      //   }
-      // }
+    const _dataSocket = socketIOClient(ENDPOINT,
+      {
+        withCredentials: true, 
+        extraHeaders: {
+          "hedera-chat-app": "abcd",
+          // 'Access-Control-Allow-Credentials': true,
+        }
+      }
     );
 
     setDataSocket(_dataSocket);
