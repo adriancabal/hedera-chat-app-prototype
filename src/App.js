@@ -92,6 +92,13 @@ const App = () => {
     const _dataSocket = socketIOClient(ENDPOINT,
       {
         withCredentials: true, 
+        // transportOptions: {
+        //   polling: {
+        //     extraHeaders: {
+        //       "hedera-chat-app": "abcd"
+        //     }
+        //   }
+        // },
         extraHeaders: {
           "hedera-chat-app": "abcd",
           // 'Access-Control-Allow-Credentials': true,
