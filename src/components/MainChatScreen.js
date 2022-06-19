@@ -10,7 +10,8 @@ import {Buffer} from "buffer";
 import io from "socket.io-client";
 import { logoutUser, } from '../helper/MessageMaker';
 import MainWindow from './MainScreen/MainWindow';
-import { CHAT_SERVER_ENDPOINT, MessageType } from "../constants";
+import { MessageType } from "../constants";
+const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
 
 // import { dmChannelMap, userMap } from "../data"
 
