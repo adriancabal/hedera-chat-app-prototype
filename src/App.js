@@ -25,7 +25,7 @@ import AppContext from './AppContext';
 // } from './data';
 // const ENDPOINT = "http://localhost:8787";
 // const ENDPOINT = "http://localhost:8880";
-const ENDPOINT = "https://pacific-spire-35776.herokuapp.com";
+const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
 // const ENDPOINT = "http://pacific-spire-35776.herokuapp.com:2052";
 // const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const DATA_TOPIC_ID = "0.0.34717180";
@@ -92,13 +92,13 @@ const App = () => {
     const _dataSocket = socketIOClient(ENDPOINT,
       {
         withCredentials: true, 
-        transportOptions: {
-          polling: {
-            extraHeaders: {
-              "hedera-chat-app": "abcd"
-            }
-          }
-        },
+        // transportOptions: {
+        //   polling: {
+        //     extraHeaders: {
+        //       "hedera-chat-app": "abcd"
+        //     }
+        //   }
+        // },
         extraHeaders: {
           "hedera-chat-app": "abcd",
           // 'Access-Control-Allow-Credentials': true,
