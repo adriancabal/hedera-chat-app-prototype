@@ -102,7 +102,8 @@ const App = () => {
         extraHeaders: {
           "hedera-chat-app": "abcd",
           // 'Access-Control-Allow-Credentials': true,
-        }
+        },
+        transports: ['websocket', 'polling', 'flashsocket'],
       }
     );
 
