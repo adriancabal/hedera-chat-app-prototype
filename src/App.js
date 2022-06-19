@@ -11,6 +11,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import { UserAction, CHAT_SERVER_ENDPOINT} from './constants';
 import socketIOClient from "socket.io-client";
+import io from "socket.io-client";
 import AppContext from './AppContext';
 // import {
 //   setChannelIndex,
@@ -89,23 +90,24 @@ const App = () => {
 
     console.log("initializingDataTopicConnection...");
     
-    const _dataSocket = socketIOClient(ENDPOINT,
-      {
-        withCredentials: true, 
-        // transportOptions: {
-        //   polling: {
-        //     extraHeaders: {
-        //       "hedera-chat-app": "abcd"
-        //     }
-        //   }
-        // },
-        extraHeaders: {
-          "hedera-chat-app": "abcd",
-          // 'Access-Control-Allow-Credentials': true,
-        },
-        transports: ['websocket', 'polling', 'flashsocket'],
-      }
-    );
+    const _dataSocket = io(ENDPOINT, {transports: ['websocket', 'polling', 'flashsocket']});
+    // const _dataSocket = socketIOClient(ENDPOINT,
+    //   {
+    //     withCredentials: true, 
+    //     // transportOptions: {
+    //     //   polling: {
+    //     //     extraHeaders: {
+    //     //       "hedera-chat-app": "abcd"
+    //     //     }
+    //     //   }
+    //     // },
+    //     extraHeaders: {
+    //       "hedera-chat-app": "abcd",
+    //       // 'Access-Control-Allow-Credentials': true,
+    //     },
+    //     transports: ['websocket', 'polling', 'flashsocket'],
+    //   }
+    // );
 
     setDataSocket(_dataSocket);
 
