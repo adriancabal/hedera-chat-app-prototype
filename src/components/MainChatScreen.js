@@ -6,7 +6,8 @@ import '../App.css';
 import AppContext from "../AppContext";
 import { Client, TopicMessageSubmitTransaction} from "@hashgraph/sdk";
 import {Buffer} from "buffer";
-import socketIOClient from "socket.io-client";
+// import socketIOClient from "socket.io-client";
+import io from "socket.io-client";
 import { logoutUser, } from '../helper/MessageMaker';
 import MainWindow from './MainScreen/MainWindow';
 import { CHAT_SERVER_ENDPOINT, MessageType } from "../constants";
@@ -75,15 +76,19 @@ const MainChatScreen = (props) => {
         const hederaClient = Client.forTestnet();
         hederaClient.setOperator(myAccountId, myPrivateKey);
        
-        // move to app.js
-        const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
-            {
-            withCredentials: true, 
-            extraHeaders: {
-              "hedera-chat-message": "abcd",
-            }
-          }
+        // io
+        const _chatSocket = io(CHAT_SERVER_ENDPOINT, 
+            {transports: ['websocket', 'polling', 'flashsocket']}
         );
+        // socketIOClient
+        // const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
+        //     {
+        //     withCredentials: true, 
+        //     extraHeaders: {
+        //       "hedera-chat-message": "abcd",
+        //     }
+        //   }
+        // );
         _chatSocket.emit("join_chat_room", currentUser);
         
         setChatSocket(_chatSocket);

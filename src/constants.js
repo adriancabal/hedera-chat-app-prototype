@@ -12,4 +12,6 @@ export const MessageType = {
     GROUP: 1,
 }
 
-export const CHAT_SERVER_ENDPOINT = "http://localhost:5003";
+export const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
+// export const CHAT_SERVER_ENDPOINT = "http://localhost:5003";
+
