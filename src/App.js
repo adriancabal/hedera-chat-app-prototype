@@ -23,11 +23,11 @@ import AppContext from './AppContext';
 //   deletedChannelList,
 //   channelIndex,
 // } from './data';
+// const ENDPOINT = "http://localhost:8787";
 // const ENDPOINT = "http://localhost:4420";
-// const ENDPOINT = "http://pacific-spire-35776.herokuapp.com";
-const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
-// const ENDPOINT = "http://fhh3nvjc25efbd71se4kga62c4.ingress.bdl.computer";
-// const ENDPOINT = "http://a9k83f91b18d9ak71a48pgvgss.palmito.duckdns.org:80";
+const ENDPOINT = "http://pacific-spire-35776.herokuapp.com";
+// const ENDPOINT = "http://pacific-spire-35776.herokuapp.com:2052";
+// const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 // let outerUserMap ={};
