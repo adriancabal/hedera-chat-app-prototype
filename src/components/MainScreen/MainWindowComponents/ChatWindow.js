@@ -75,48 +75,8 @@ const ChatWindow = (props) => {
         
     }, [typingStatus]);
 
-    // useEffect(() => {
-    //     const handleClick = (event) => {
-    //         // clicked outside textbox1
-    //         if (messageInputBox.current && !messageInputBox.current.contains(event.target)) {
-    //             // alert("clicked outside textbox1, firstInputValue: " + firstInputValue);
-    //             // onClickOutsideTextbox1 && onClickOutsideTextbox1();
-    //             setIsCursorTextbox(false);
-    //         }
-    //         // clicked inside textbox1
-    //         if (messageInputBox.current && messageInputBox.current.contains(event.target)) {
-    //             // alert("clicked on textbox1, firstInputValue: " + firstInputValue);
-    //             setIsCursorTextbox(true);
-    //         }
-    //     };
-    //     document.addEventListener('click', handleClick, true);
-
-    //     return () => {
-    //         document.removeEventListener('click', handleClick, true);
-    //     };
-
-
-    // }, [messageInputValue]);
-
 
     console.log("ChatWindow class function");
-    // if(currentDmMessages.length > 0){
-    //     let _dmChannelMessagesMap = {...dmChannelMessagesMap};
-    //     let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
-    //     for(let i=0; i < currentDmMessages.length; i++){
-    //         const newMsg = currentDmMessages[i];
-    //         if(!_dmChannelMessagesMap[newMsg.index]){
-    //             _dmChannelMessagesMap[newMsg.index] = {
-    //                 msg: newMsg.msg,
-    //                 sender: newMsg.sender,
-    //                 timestamp: newMsg.timestamp
-    //             };
-    //             _dmChannelMsgIndexes.unshift(newMsg.index);
-    //             setDmChannelMessagesMap(_dmChannelMessagesMap);
-    //             setDmChannelMsgIndexes(_dmChannelMsgIndexes);
-    //         }
-    //     }
-    // }
 
     if(dmChannelMsgIndexes.length && dmChannelMsgIndexes[dmChannelMsgIndexes.length -1] !== 0){
         let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
@@ -180,8 +140,8 @@ const ChatWindow = (props) => {
                     const channelIndex = response.channelIndex;
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
-                    // const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
-                    const isSuccess = true;
+                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    // const isSuccess = true;
                     // console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
                     if(isSuccess){
                         // let _dmChannelMap = {...dmChannelMap};
@@ -371,44 +331,16 @@ const ChatWindow = (props) => {
                 setMessageInputValue("");
                 // setMyMessages(_myMessages);
                 
-                const isSendChatMsgSuccess = true;
-                // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                // const isSendChatMsgSuccess = true;
+                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
                 // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
 
                 if(isSendChatMsgSuccess){
                     console.log("sendChatMsgSuccess to existing dmuser");
-                    // _myMessages[dmChannel].msgMap[currentMessageIndex] = {
-                    //     timestamp: timestamp,
-                    //     msg: messageInputValue,
-                    //     sender: currentUser,
-                    // };
-                    // _myMessages[dmChannel].msgList.unshift(currentMessageIndex);
-                    // const messageDm = {
-                    //     messageString: messageString,
-                    //     dmUser: dmUser.user,
-                    // };
-                    // chatSocket.emit("send_message_dm", messageDm);
-                    // setMessageInputValue("");
-                    // setMyMessages(_myMessages);
                 }
             }
         }
     }
-
-    // const findExistingDmChannel = () => {
-    //     console.log("currentUser: ", currentUser);
-    //     console.log("dmUser: ", dmUser);
-    //     console.log("userMap: ", userMap);
-    //     let dmChannelTemp = -1;
-    //     userMap[currentUser].dms.forEach(dm => {
-    //         if(dm[0] === dmUser){
-    //             console.log("dm[0]: ", dm[0]);
-    //             console.log("dm[1]: ", dm[1]);
-    //         dmChannelTemp = dm[1];
-    //         }
-    //     });
-    //     return dmChannelTemp;
-    // }
 
     const onChangeMessageInput = (value) => {
         setMessageInputValue(value);
