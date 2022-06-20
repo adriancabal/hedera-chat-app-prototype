@@ -10,7 +10,7 @@ import MainChatScreen from './components/MainChatScreen';
 import { useContext, useEffect, useState } from 'react';
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import { UserAction, CHAT_SERVER_ENDPOINT} from './constants';
-import socketIOClient from "socket.io-client";
+// import socketIOClient from "socket.io-client";
 import io from "socket.io-client";
 import AppContext from './AppContext';
 // import {
@@ -31,7 +31,6 @@ const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
 // const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
-// let outerUserMap ={};
 
 const App = () => {
   // const hederaClient = useSelector((state) => state.user.hederaClient);

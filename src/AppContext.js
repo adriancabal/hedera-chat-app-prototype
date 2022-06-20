@@ -27,6 +27,7 @@ const AppContext = createContext();
     const [currentDmMessages, setCurrentDmMessages] = useState([]);
     const [unreadMsgs, setUnreadMsgs]= useState({})
     const [currentDmUser, setCurrentDmUser] = useState({});
+    const [typingStatus, setTypingStatus] = useState({});
 
     const resetCurrentDmMessages = () => {
         setCurrentDmMessages([]);
@@ -58,6 +59,7 @@ const AppContext = createContext();
                 dataSocket,
                 userDms,
                 unreadMsgs,
+                typingStatus,
                 setCurrentUser,
                 setCurrentDmUser,
                 setCurrentDmMessages,
@@ -76,6 +78,7 @@ const AppContext = createContext();
                 setChannelIndexMax,
                 setUserDms,
                 setUnreadMsgs,
+                setTypingStatus,
             }}
         >
             {children}

@@ -7,7 +7,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 
 const SideBar = (props) => {
     const {currentUser, dataSocket, userDms, setUserDms, myMessages, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
-    const userMap ={};
+    const {typingStatus} = useContext(AppContext);
     const setMainWindow = props.setMainWindow;
     console.log("Sidebar: myMessages: ", myMessages);
 
@@ -37,7 +37,7 @@ const SideBar = (props) => {
         // }
         let _unreadMsgs = {...unreadMsgs};
         if(_unreadMsgs[dmUser.channel]){
-            _unreadMsgs[dmUser.channel] = 0;
+            _unreadMsgs[dmUser.channel] = undefined;
         }
         setUnreadMsgs(_unreadMsgs);
         
@@ -46,6 +46,8 @@ const SideBar = (props) => {
         setMainWindow("chatDM");
 
     }
+
+    console.log("Sidebar-dmUserUnreadMsgs: " + unreadMsgs["user2"]);
     // const onClickDMAddmary
     return (
         <div className='flex-col  h-full w-1/5 Scrollbar custom-scrollbar' >
@@ -78,7 +80,6 @@ const SideBar = (props) => {
                     userDms.map(user => {
                         console.log("userDms.map: ", user);
                         const userColor =  user.isLoggedIn ? "text-[#0be633]" : "text-[gray]";
-                        // const userColor =  userMap[user].isLoggedIn ? "text-[#0be633]" : "text-[gray]";
                         return(
 
                         
@@ -91,19 +92,25 @@ const SideBar = (props) => {
                                     </div>
                                 <p className='self-center text-white'>{user.user}</p>
                                 {/* {  myMessages[user.channel] && myMessages[user.channel].unread && */}
-                                {unreadMsgs[user.channel] &&
+                                {unreadMsgs[user.channel] && unreadMsgs[user.channel] > 0 && !typingStatus[user.user] &&
                                     <div className='circle self-center ml-5 justify-center'>
                                         <p className='self-center text-white font-bold text-sm'>
-                                            {`${unreadMsgs[user.channel] }`}
-                                            {/* {"9+"} */}
+                                            {unreadMsgs[user.channel]}
                                         </p>
                                     </div>
                                 }
-                                {!unreadMsgs[user.channel] &&
+                                {!unreadMsgs[user.channel] && !typingStatus[user.user] &&
                                     <div className='noNewMessage self-center ml-5 justify-center'>
                                         <p className='self-center text-white font-bold text-sm'>
-                                            {/* {`${unreadMsgs[user.channel] }`} */}
-                                            {/* {"9+"} */}
+                                      
+                                        </p>
+                                    </div>
+                                }
+                                {/* typing status */}
+                                {typingStatus[user.user] &&
+                                    <div className='noNewMessage self-center ml-5 justify-center'>
+                                        <p className='self-center text-[#3edced] font-bold text-sm'>
+                                            {"typing..."}
                                         </p>
                                     </div>
                                 }

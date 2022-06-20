@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import SendIcon from '@mui/icons-material/Send';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -15,9 +15,11 @@ const DATA_TOPIC_ID = process.env.REACT_APP_HEDERA_DATA_TOPIC_ID;
 const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var lastTypedTimestamp = 0;
+var isMeTyping = false;
 
 const ChatWindow = (props) => {
-    const { currentUser, hederaClient, myMessages, setMyMessages, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
+    const { currentUser, hederaClient, myMessages, typingStatus, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
     const { dataSocket, userDms, setUserDms} = useContext(AppContext);
@@ -25,6 +27,9 @@ const ChatWindow = (props) => {
     const [messageInputValue, setMessageInputValue] = useState("");
     const [dmChannelMessagesMap, setDmChannelMessagesMap] = useState({});
     const [dmChannelMsgIndexes, setDmChannelMsgIndexes] = useState([]);
+    const [isCursorTextbox, setIsCursorTextbox] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const messageInputBox = useRef(null);
 
     useEffect(() => {
         console.log("ChatWindow useeffect - dmUser: " + dmUser.user);
@@ -41,6 +46,7 @@ const ChatWindow = (props) => {
     }, [dmUser]);
 
     useEffect(() => {
+        console.log("ChatWindow - currentDmMessages changed: ", currentDmMessages);
         if(currentDmMessages.length > 0){
             let _dmChannelMessagesMap = {...dmChannelMessagesMap};
             let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
@@ -58,7 +64,39 @@ const ChatWindow = (props) => {
                 }
             }
         }
-    }, [currentDmMessages])
+    }, [currentDmMessages]);
+
+    useEffect(() => {
+        console.log("ChatWindowTypingStatus: ", JSON.stringify(typingStatus) + ", " + typingStatus[dmUser.user]);
+        
+        // console.log("ChatWindowTypingStatus: ", typingStatus[dmUser]);
+        console.log(`ChatWindowSetIsTyping: ${typingStatus[dmUser.user]}`);
+        setIsTyping(!!typingStatus[dmUser.user]);
+        
+    }, [typingStatus]);
+
+    // useEffect(() => {
+    //     const handleClick = (event) => {
+    //         // clicked outside textbox1
+    //         if (messageInputBox.current && !messageInputBox.current.contains(event.target)) {
+    //             // alert("clicked outside textbox1, firstInputValue: " + firstInputValue);
+    //             // onClickOutsideTextbox1 && onClickOutsideTextbox1();
+    //             setIsCursorTextbox(false);
+    //         }
+    //         // clicked inside textbox1
+    //         if (messageInputBox.current && messageInputBox.current.contains(event.target)) {
+    //             // alert("clicked on textbox1, firstInputValue: " + firstInputValue);
+    //             setIsCursorTextbox(true);
+    //         }
+    //     };
+    //     document.addEventListener('click', handleClick, true);
+
+    //     return () => {
+    //         document.removeEventListener('click', handleClick, true);
+    //     };
+
+
+    // }, [messageInputValue]);
 
 
     console.log("ChatWindow class function");
@@ -142,9 +180,9 @@ const ChatWindow = (props) => {
                     const channelIndex = response.channelIndex;
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
-                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
-                    // const isSuccess = true;
-                    console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
+                    // const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    const isSuccess = true;
+                    // console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
                     if(isSuccess){
                         // let _dmChannelMap = {...dmChannelMap};
                         // let _dmChannelList = [...dmChannelList];
@@ -333,8 +371,8 @@ const ChatWindow = (props) => {
                 setMessageInputValue("");
                 // setMyMessages(_myMessages);
                 
-                
-                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                const isSendChatMsgSuccess = true;
+                // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
                 // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
 
                 if(isSendChatMsgSuccess){
@@ -404,8 +442,52 @@ const ChatWindow = (props) => {
         // console.log("The message transaction status: " + transactionStatus)
     }
 
-    // console.log("ChatWindow-myMessages: ", myMessages[1]);
+    const onKeyDownHandler = (event) => {
+        if(event.key === 'Enter'){
+            isMeTyping = false;
+            chatSocket.emit("send_message_dm", {
+                typingEvent: true,
+                dmUser: dmUser,
+                sender: currentUser,
+                isTyping: false,
+            });
+            onClickSend();
+        }
+        const thisTimestamp = (new Date()).getTime();
+        console.log("thisTimestamp: " + thisTimestamp);
+        lastTypedTimestamp = thisTimestamp;
+        if(!isMeTyping){
+            chatSocket.emit("send_message_dm", {
+                typingEvent: true,
+                dmUser: dmUser,
+                sender: currentUser,
+                isTyping: true,
+            });
+            // chatSocket.emit("typing_event", {
+            //     typingEvent: true,
+            //     dmUser: dmUser,
+            //     from: currentUser,
+            //     isTyping: true,
+            // });
+            isMeTyping = true;
+        }
 
+        setTimeout(() => {
+            console.log(`thisTimestamp: ${thisTimestamp}, lastTypedTimestamp: ${lastTypedTimestamp}`);
+            if(thisTimestamp === lastTypedTimestamp && isMeTyping){
+                isMeTyping = false;
+                chatSocket.emit("send_message_dm", {
+                    typingEvent: true,
+                    dmUser: dmUser,
+                    sender: currentUser,
+                    isTyping: false,
+                });
+            }
+        }, 1000);
+    }
+
+    // console.log("ChatWindow-myMessages: ", myMessages[1]);
+    console.log("$isTyping: " + isTyping);
     return (
         <div className="flex flex-col w-full h-full">
             <div className='flex flex-row w-full h-12 bg-[#343d33]  border-y-[1px] border-[gray]' >
@@ -429,7 +511,7 @@ const ChatWindow = (props) => {
                         let myMessage = dmChannelMessagesMap[messageIndex];
                         if(messageIndex === 0){
                             myMessage = {
-                               msg: `*** Beginning of your chat history with ${dmUser.user} ***`,
+                               msg: `# Beginning of your chat with ${dmUser.user} `,
                             } ;
                         }
                         console.log("myMessage: ", myMessage);
@@ -496,6 +578,12 @@ const ChatWindow = (props) => {
                 }
             </div>
 
+            {   isTyping &&
+                <div className="flex flex-row w-full h-[20px] text-[#3edced]">
+                    <p className="ml-3">{`${dmUser.user} typing...`}</p>
+                </div>
+            }
+
             <div className='flex flex-row w-full h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2'>
                 <input
                     autoComplete={"off"}
@@ -507,6 +595,8 @@ const ChatWindow = (props) => {
                     onChange={e => {
                         onChangeMessageInput(e.target.value);
                     }}
+                    onKeyDownCapture={onKeyDownHandler}
+                    ref={messageInputBox}
                 />
                 <div 
                     className={`flex text-white w-12 h-10 self-center justify-center ${sendButtonHoverCursor} ${sendButtonBgColor}`}
