@@ -101,18 +101,20 @@ const MainChatScreen = (props) => {
             chatMessageController(message);
         });
 
-    }, []);
+        _chatSocket.on("receive_typing_event", data => {
+            console.log("receive_typing_event");
+            let _typingStatus = {...typingStatus};
+            const userNames = currentUserDms.map(userObj => userObj.user);
+            console.log("typing_usernames: ", userNames);
+            if(userNames.includes(data.sender)){
+                console.log("includes_typing_usernames");
+                _typingStatus[data.sender] = data.isTyping;
+                console.log("_typingStatus: ", _typingStatus);
+                setTypingStatus(_typingStatus);
+            };
+        });
 
-    // useEffect(()=> {
-    //     chatSocket.on("receive_typing_event", data => {
-    //         console.log("receive_typing_event");
-    //         let _typingStatus = {...typingStatus};
-    //         const userNames = userDms.map(userObj => userObj.user);
-    //         if(userNames.includes(data.sender)){
-    //             _typingStatus[data.sender] = data.isTyping;
-    //         };
-    //     });
-    // }, [chatSocket])
+    }, []);
 
     const chatMessageController = (message) => {
         console.log("chatMessageController");
@@ -122,7 +124,7 @@ const MainChatScreen = (props) => {
 
         // const msgTimestampMs = message.consensusTimestamp.toDate().getTime();
         const msgObj = JSON.parse(message);
-        const isTypingEvent = msgObj.typingEvent;
+        // const isTypingEvent = msgObj.typingEvent;
         const msgType = msgObj.type;
         const sender = msgObj.sender;
         const channel = msgObj.channel;
@@ -131,19 +133,19 @@ const MainChatScreen = (props) => {
         const timestamp = msgObj.timestamp;
         console.log("chatMessage: ", message);
         // console.log("messageSentTimestamp: ", new Date(timestamp));
-        if(isTypingEvent){
-            console.log("receive_typing_event: ", msgObj);
-            let _typingStatus = {...typingStatus};
-            const userNames = currentUserDms.map(userObj => userObj.user);
-            console.log("typing_usernames: ", userNames);
-            if(userNames.includes(msgObj.sender)){
-                console.log("includes_typing_usernames");
-                _typingStatus[msgObj.sender] = msgObj.isTyping;
-                console.log("_typingStatus: ", _typingStatus);
-                setTypingStatus(_typingStatus);
-            };
-        }
-        else if(msgType === MessageType.DM){
+        // if(isTypingEvent){
+        //     console.log("receive_typing_event: ", msgObj);
+        //     let _typingStatus = {...typingStatus};
+        //     const userNames = currentUserDms.map(userObj => userObj.user);
+        //     console.log("typing_usernames: ", userNames);
+        //     if(userNames.includes(msgObj.sender)){
+        //         console.log("includes_typing_usernames");
+        //         _typingStatus[msgObj.sender] = msgObj.isTyping;
+        //         console.log("_typingStatus: ", _typingStatus);
+        //         setTypingStatus(_typingStatus);
+        //     };
+        // }
+        if(msgType === MessageType.DM){
             console.log("channel: " + channel);
             console.log("currentDmUser: ", dmUserSelected);
             console.log("currentDmUser.channel: " + channel + ", " + dmUserSelected.channel) ;

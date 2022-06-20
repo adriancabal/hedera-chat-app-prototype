@@ -445,45 +445,40 @@ const ChatWindow = (props) => {
     const onKeyDownHandler = (event) => {
         if(event.key === 'Enter'){
             isMeTyping = false;
-            chatSocket.emit("send_message_dm", {
-                typingEvent: true,
+            chatSocket.emit("typing_event", {
                 dmUser: dmUser,
                 sender: currentUser,
                 isTyping: false,
             });
             onClickSend();
-        }
-        const thisTimestamp = (new Date()).getTime();
-        console.log("thisTimestamp: " + thisTimestamp);
-        lastTypedTimestamp = thisTimestamp;
-        if(!isMeTyping){
-            chatSocket.emit("send_message_dm", {
-                typingEvent: true,
-                dmUser: dmUser,
-                sender: currentUser,
-                isTyping: true,
-            });
-            // chatSocket.emit("typing_event", {
-            //     typingEvent: true,
-            //     dmUser: dmUser,
-            //     from: currentUser,
-            //     isTyping: true,
-            // });
-            isMeTyping = true;
-        }
-
-        setTimeout(() => {
-            console.log(`thisTimestamp: ${thisTimestamp}, lastTypedTimestamp: ${lastTypedTimestamp}`);
-            if(thisTimestamp === lastTypedTimestamp && isMeTyping){
-                isMeTyping = false;
-                chatSocket.emit("send_message_dm", {
-                    typingEvent: true,
+            
+        } else {
+            const thisTimestamp = (new Date()).getTime();
+            console.log("thisTimestamp: " + thisTimestamp);
+            lastTypedTimestamp = thisTimestamp;
+            if(!isMeTyping){
+                chatSocket.emit("typing_event", {
                     dmUser: dmUser,
                     sender: currentUser,
-                    isTyping: false,
+                    isTyping: true,
                 });
+                isMeTyping = true;
             }
-        }, 1000);
+
+            setTimeout(() => {
+                console.log(`thisTimestamp: ${thisTimestamp}, lastTypedTimestamp: ${lastTypedTimestamp}`);
+                if(thisTimestamp === lastTypedTimestamp && isMeTyping){
+                    isMeTyping = false;
+                    chatSocket.emit("typing_event", {
+                        dmUser: dmUser,
+                        sender: currentUser,
+                        isTyping: false,
+                    });
+                    
+                }
+            }, 1000);
+
+        }
     }
 
     // console.log("ChatWindow-myMessages: ", myMessages[1]);
