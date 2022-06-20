@@ -2,6 +2,7 @@ import { useState, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import SendIcon from '@mui/icons-material/Send';
 import CircleIcon from '@mui/icons-material/Circle';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import AppContext from "../../../AppContext";
 // import { userMap, dmChannelList, dmChannelMap, setChannelIndex } from '../../../data';
 import { TopicMessageSubmitTransaction} from "@hashgraph/sdk";
@@ -17,13 +18,15 @@ const MESSAGE_TOPIC_ID = process.env.REACT_APP_HEDERA_MESSAGE_TOPIC_ID;
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 var lastTypedTimestamp = 0;
 var isMeTyping = false;
+var WINDOW_WIDTH = window.innerWidth;
 
 const ChatWindow = (props) => {
     const { currentUser, hederaClient, myMessages, typingStatus, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
-    const { dataSocket, userDms, setUserDms} = useContext(AppContext);
+    const { dataSocket, userDms, setUserDms, setCurrentDmUser} = useContext(AppContext);
     // const dmUser = props.currentDmUser;
+    const setMainWindow = props.setMainWindow;
     const [messageInputValue, setMessageInputValue] = useState("");
     const [dmChannelMessagesMap, setDmChannelMessagesMap] = useState({});
     const [dmChannelMsgIndexes, setDmChannelMsgIndexes] = useState([]);
@@ -140,8 +143,8 @@ const ChatWindow = (props) => {
                     const channelIndex = response.channelIndex;
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
-                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
-                    // const isSuccess = true;
+                    // const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    const isSuccess = true;
                     // console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
                     if(isSuccess){
                         // let _dmChannelMap = {...dmChannelMap};
@@ -201,8 +204,8 @@ const ChatWindow = (props) => {
                         // const currentMessageIndex = myMessages[dmUser].msgList.length;
                         // const timestamp = new Date().getTime();
                        
-                        const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
-                        // const isSendChatMsgSuccess = true;
+                        // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                        const isSendChatMsgSuccess = true;
                         console.log("send first message Success: " + isSendChatMsgSuccess);
                         // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
                         // const isSendChatMsgSuccess = true;
@@ -331,8 +334,8 @@ const ChatWindow = (props) => {
                 setMessageInputValue("");
                 // setMyMessages(_myMessages);
                 
-                // const isSendChatMsgSuccess = true;
-                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                const isSendChatMsgSuccess = true;
+                // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
                 // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
 
                 if(isSendChatMsgSuccess){
@@ -413,11 +416,30 @@ const ChatWindow = (props) => {
         }
     }
 
+    const goBackToSideBarView = () => {
+        setMainWindow(null);
+    }
+
     // console.log("ChatWindow-myMessages: ", myMessages[1]);
     console.log("$isTyping: " + isTyping);
+    // const windowWidth2 = windowWidth/2;
+    const defaultMsgWidth = WINDOW_WIDTH - 10;
+    const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+    const defaultMsgWidthStyle = `w-[${defaultMsgWidth}px]`;
+    // const defaultWidth = "w-full";
+
     return (
-        <div className="flex flex-col w-full h-full">
-            <div className='flex flex-row w-full h-12 bg-[#343d33]  border-y-[1px] border-[gray]' >
+        <div className={`flex flex-1 flex-col md:w-full ${defaultWidth} h-full`}>
+            <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
+                
+                {WINDOW_WIDTH <= 768 &&
+                    <div 
+                        className={`flex text-white justify-center ml-0 w-[46px]`}
+                        onClick={() => goBackToSideBarView() }
+                    >
+                        <ArrowBackIosNewIcon className='self-center' fontSize=''/>
+                    </div>
+                }
                 <p className='self-center text-white ml-4'>{"Direct Message:"}</p>
                 <div className={`flex ${statusIconColor} justify-center ml-4`}>
                     <CircleIcon className='self-center' fontSize=''/>
@@ -427,7 +449,7 @@ const ChatWindow = (props) => {
             </div>
 
 
-            <div className='flex flex-col-reverse w-full h-[650px] bg-[transparent] scrollbar-dark-gray'>
+            <div className={`flex flex-col-reverse md:w-full ${defaultWidth} h-[650px] bg-[transparent] scrollbar-dark-gray`}>
                 
                 {
                     // myMessages[dmUser.channel].msgList.map(messageIndex => {
@@ -473,22 +495,22 @@ const ChatWindow = (props) => {
                         const msgSenderColor = myMessage.sender === currentUser ? "text-[#3ff281]" : "text-[#3edced]";
                         const msgTimeColor = myMessage.sender === currentUser ? "text-[#a4edba]" : "text-[#9fe5ed]";
                         return (
-                            <div className="flex flex-col w-full border-t-[1px] border-[gray] p-2">
+                            <div className={`flex flex-col md:w-full ${defaultMsgWidthStyle} border-t-[1px] border-[gray] p-2`}>
                                 {
                                     !!sender &&
-                                    <div className='flex flex-row w-full h-8 '>
+                                    <div className={`flex flex-auto flex-row md:w-full ${defaultMsgWidthStyle} h-8`}>
                                         <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
                                         <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
-                                        <div className='flex flex-row ml-2 grow justify-end '>
+                                        <div className='flex flex-row ml-0 grow justify-end '>
                                             <p className={`text-white `}>{`${DAYS_OF_WEEK[dayOfWeek]}, ${month+1}-${dayOfMonth}-${year}`}</p>
                                         </div>
                                         
                                     </div>
                                 }
                                 
-                                <div className='flex flex-col w-full grow  break-words'>
+                                <div className={`flex flex-auto flex-col md:w-full ${defaultMsgWidthStyle} grow  break-words`}>
                                     {/* {message.message} */}
-                                    <p className='flex grow w-full text-white break-words line-clamp-6 '>{myMessage.msg}</p>
+                                    <p className={`flex flex-auto grow md:w-full ${defaultMsgWidthStyle} text-white break-words line-clamp-6 `}>{myMessage.msg}</p>
                                 </div>
                                 
                             </div>
@@ -497,7 +519,7 @@ const ChatWindow = (props) => {
                 }
                 {
                     Object.keys(dmChannelMessagesMap).length === 0 && 
-                    <div className="flex w-full border-t-[0px] border-[gray] p-2 pt-4">
+                    <div className={`flex md:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
                         <div className='flex flex-row w-full h-8'>
                             <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
                         </div>
@@ -506,12 +528,12 @@ const ChatWindow = (props) => {
             </div>
 
             {   isTyping &&
-                <div className="flex flex-row w-full h-[20px] text-[#3edced]">
+                <div className={`flex flex-auto flex-row md:w-full ${defaultWidth} h-[20px] text-[#3edced]`}>
                     <p className="ml-3">{`${dmUser.user} typing...`}</p>
                 </div>
             }
 
-            <div className='flex flex-row w-full h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2'>
+            <div className={`flex flex-auto flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2`}>
                 <input
                     autoComplete={"off"}
                     className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"

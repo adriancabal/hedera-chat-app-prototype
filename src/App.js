@@ -25,12 +25,16 @@ import AppContext from './AppContext';
 //   channelIndex,
 // } from './data';
 // const ENDPOINT = "http://localhost:8787";
-// const ENDPOINT = "http://localhost:8880";
-const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
+const ENDPOINT = "http://localhost:8880";
+// const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
 // const ENDPOINT = "http://pacific-spire-35776.herokuapp.com:2052";
 // const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
+
+const WINDOW_WIDTH = window.innerWidth;
+const WINDOW_HEIGHT = window.innerHeight;
+console.log("App-WindowWidth: " + WINDOW_WIDTH);
 
 const App = () => {
   // const hederaClient = useSelector((state) => state.user.hederaClient);
@@ -39,7 +43,7 @@ const App = () => {
   const [userMap, setUserMap] = useState({});
   const [userList, setUserList] = useState([]);
   // const [hederaClient, setHederaClient] = useState(null);
-  const { currentUser, setDataSocket, setChatSocket, setMyMessages } = useContext(AppContext);
+  const { currentUser, setDataSocket} = useContext(AppContext);
   // const [currentUser, setCurrentUser] = useState("");
   const  [dmChannelMap, setDmChannelMap] = useState({});
   const [dmChannelList, setDmChannelList] = useState([]);
@@ -342,23 +346,26 @@ const App = () => {
   }
 
   const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
-
+  const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+  const defaultHeight = `w-[${WINDOW_HEIGHT}px]`;
+  // ${defaultHeight}
+  console.log("App-WindowWidth2: " + defaultWidth);
   return (
-      <div className="flex flex-col w-screen bg-black h-screen ">
-        <div className='flex flex-col mt-16 mb-16 h-20 justify-center bg-[black]'>
-          <h1 className="text-center text-white text-4xl ">
+      <div className={`flex flex-col md:w-screen bg-black h-screen md:h-screen `}>
+        <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
+          <p className="text-center text-white text-2xl md:text-4xl">
             Chat App Prototype
-          </h1>
-          <h1 className="text-center text-white text-md mt-2">
+          </p>
+          <p className="text-center text-white text-sm md:text-md mt-2">
             powered by Hedera Hashgraph
-          </h1>
+          </p>
         </div>
         {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
         {
           !!!currentUser && isNewAccountCreated &&
           <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
         }
-        <div className={`flex ${bodyMarginTop} justify-center h-[700px] w-[1000px] bg-[black] self-center`}>
+        <div className={`flex ${bodyMarginTop} justify-center ${defaultHeight} md:h-[700px] md:w-[1000px] ${defaultWidth} bg-[black] self-center`}>
           
           { 
             !!currentUser 

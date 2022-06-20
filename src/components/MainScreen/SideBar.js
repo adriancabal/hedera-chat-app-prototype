@@ -4,10 +4,11 @@ import '../../App.css';
 import AppContext from "../../AppContext";
 import AddIcon from '@mui/icons-material/Add';
 import CircleIcon from '@mui/icons-material/Circle';
-
+const WINDOW_WIDTH = window.innerWidth;
 const SideBar = (props) => {
     const {currentUser, dataSocket, userDms, setUserDms, myMessages, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
     const {typingStatus} = useContext(AppContext);
+    const mainWindow = props.mainWindow;
     const setMainWindow = props.setMainWindow;
     console.log("Sidebar: myMessages: ", myMessages);
 
@@ -49,8 +50,9 @@ const SideBar = (props) => {
 
     console.log("Sidebar-dmUserUnreadMsgs: " + unreadMsgs["user2"]);
     // const onClickDMAddmary
+    const defaultSideBarWidth = mainWindow ? "w-0" : `w-full`;
     return (
-        <div className='flex-col  h-full w-1/5 Scrollbar custom-scrollbar' >
+        <div className={`flex-col flex-none  h-full md:w-1/5 ${defaultSideBarWidth} Scrollbar custom-scrollbar`} >
 
             {/* All Messages */}
             <div 
@@ -64,7 +66,7 @@ const SideBar = (props) => {
             </div> */}
             {/* Direct Messages */}
             <div className='flex-col justify-center'>
-                <div className='flex flex-row h-10 bg-[black]'>
+                <div className='flex flex-row h-10 bg-[black] justify-center'>
                     <p className='self-center ml-6 text-white text-sm'>{"Direct Messages"}</p>
                     <div 
                         className='flex ml-4 text-white self-center h-full w-9 justify-center hover:bg-[#292a33] hover:cursor-pointer'

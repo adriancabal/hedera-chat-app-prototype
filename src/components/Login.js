@@ -13,7 +13,7 @@ import App from '../App';
 // import { userMap, userList } from '../data';
 // import SearchIcon from '@mui/icons-material/Search';
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
-
+const WINDOW_WIDTH = window.innerWidth;
 
 const Login = (props) => {
     // const dispatch = useDispatch();
@@ -286,8 +286,10 @@ const Login = (props) => {
         setErrorMessage('');
     }
 
+    const defaultWidth = "w-[" + 300 + "px]";
+
     return (
-        <div className={`flex flex-col ${modalColor} h-96 w-96 rounded-xl`}>
+        <div className={`flex flex-col ${defaultWidth} ${modalColor} h-96 w-96 rounded-xl`}>
             {   isLoading &&
                 <img src={logo} className="App-logo" alt="logo" />
             }

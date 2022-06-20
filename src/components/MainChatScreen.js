@@ -10,10 +10,12 @@ import io from "socket.io-client";
 import { logoutUser, } from '../helper/MessageMaker';
 import MainWindow from './MainScreen/MainWindow';
 import { MessageType } from "../constants";
-// const CHAT_SERVER_ENDPOINT = "http://localhost:443";
-const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
+const CHAT_SERVER_ENDPOINT = "http://localhost:443";
+// const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
 // import { dmChannelMap, userMap } from "../data"
-
+const WINDOW_WIDTH = window.innerWidth;
+const WINDOW_HEIGHT = window.innerHeight;
+console.log("MainChatScreenWidth: " + WINDOW_WIDTH + ", " + WINDOW_HEIGHT);
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
 let dmUserSelected = null;
 let currentUserDms = [];
@@ -27,7 +29,7 @@ const MainChatScreen = (props) => {
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
     // const socket = useSelector((state) => state.user.socket);
-    const [mainWindow, setMainWindow] = useState("all");
+    const [mainWindow, setMainWindow] = useState(WINDOW_WIDTH > 768 ? "all" : null);
     // const [currentDmUser, setCurrentDmUser] = useState(null);
     // const [myMessages, setMyMessages] = useState({});
     // const [myMessages, setMyMessages] = useState([]);
@@ -161,6 +163,7 @@ const MainChatScreen = (props) => {
                 console.log("chat-message-push-current: ", _currentDmMsgs );
                 setCurrentDmMessages(_currentDmMsgs);
             }else {
+
                 let _userDms = [...currentUserDms];
                 console.log("chatSocket: currentUserDms: ", _userDms);
                 let _userDmUsers = _userDms.map(userDm => userDm.user);
@@ -238,14 +241,17 @@ const MainChatScreen = (props) => {
         
         // console.log("myMessages: ", myMessages);
     }
-
     
+    const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+    const defaultHeight = `w-[${WINDOW_HEIGHT}px]`;
+    console.log("defaultWidthMCS: " + defaultWidth);
+
     return(
-        <div className={`flex flex-col h-full w-[1000px] rounded-lg ${chatScreenColor}`}>
+        <div className={`flex flex-auto flex-col h-full md:w-[1000px] ${defaultWidth} rounded-lg ${chatScreenColor}`}>
            
-            <div className={`flex flex-row  h-[8%] w-[1000px] rounded-md`}>
+            <div className={`flex md:flex-row flex-col md:h-[8%] md:w-[1000px] ${defaultWidth} rounded-md`}>
                 {/* Logout */}
-                <div className={`flex flex-row w-1/5 justify-center`}>
+                <div className={`flex flex-row md:w-1/5 justify-center`}>
                     <button 
                         className='text-lg font-bold text-[#f23f69] '
                         onClick={() => {onClickLogout()}}
@@ -255,7 +261,7 @@ const MainChatScreen = (props) => {
                 </div>
 
                 {/* User online */}
-                <div className='flex flex-row w-4/5 justify-center'>
+                <div className={`flex flex-row md:w-4/5 justify-center`}>
                     <p className='text-lg text-[#3ff281] self-center'>
                         <span className='font-bold'>{`${currentUser}`}</span>
                         {` - is logged in`}
@@ -264,9 +270,9 @@ const MainChatScreen = (props) => {
             </div>
 
             {/* Main View */}
-            <div className={`flex flex-row  h-[92%] w-[1000px]`}>
+            <div className={`flex flex-row  h-[92%] md:w-[1000px] ${defaultWidth}`}>
                 {/* Scoll sidebar */}
-                <SideBar setMainWindow={setMainWindow} />
+                <SideBar mainWindow={mainWindow} setMainWindow={setMainWindow} />
                 {/* <SideBar setMainWindow={setMainWindow} setCurrentDmUser={setCurrentDmUser} myMessages={myMessages}/> */}
 
                 {/* Main Window */}

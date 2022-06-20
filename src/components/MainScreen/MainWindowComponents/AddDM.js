@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import CircleIcon from '@mui/icons-material/Circle';
 import AppContext from "../../../AppContext";
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 // import { userList, userMap } from "../../../data";
-
+const WINDOW_WIDTH = window.innerWidth;
 const AddDM = (props) => {
     const { currentUser, dataSocket, userList, userMap,  setCurrentDmUser} = useContext(AppContext);
     const [searchInputValue, setSearchInputValue] = useState("");
@@ -66,9 +67,16 @@ const AddDM = (props) => {
         // open chat window
     }
 
+    const goBackToSideBarView = () => {
+        setMainWindow(null);
+        setCurrentDmUser(null);
+    }
+
+    const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+
     return ( 
         <div 
-            className="flex flex-col h-full w-full]"
+            className={`flex flex-col h-full ${defaultWidth} md:w-full`}
             // onFocus={(e) => {
             //     console.log('Focused on input');
             //     dataSocket.emit("getAllUsers", currentUser);
@@ -79,13 +87,21 @@ const AddDM = (props) => {
             // }}
         >
             {/* Search for DMs */}
-            <div className="flex flex-row w-full h-14 bg-[#292a33] justify-center border-y-[1px] border-[gray] text-white">
+            <div className={`flex flex-row ${defaultWidth} md:w-full md:justify-center h-14 bg-[#292a33] border-y-[1px] border-[gray] text-white`}>
+                {WINDOW_WIDTH <= 768 &&
+                    <div 
+                        className={`flex text-white justify-center w-[46px] mr-4`}
+                        onClick={() => goBackToSideBarView() }
+                    >
+                        <ArrowBackIosNewIcon className='self-center' fontSize=''/>
+                    </div>
+                }
                 <div className='flex h-10 w-10 bg-[#292a33] justify-center self-center rounded-l-md border-[1px] border-[gray]'>
                     <SearchIcon className='text-white self-center' />
                 </div>
                 <input
                     autoComplete={"off"}
-                    className='w-72 h-10 bg-[gray] mt self-center rounded-r-md focus:outline-none pl-2 search-input-placeholder '
+                    className='w-60 md:w-72 h-10 bg-[gray] mt self-center rounded-r-md focus:outline-none pl-2 search-input-placeholder '
                     type="text" 
                     name="name" 
                     placeholder={" Search Direct Message"}
@@ -97,7 +113,7 @@ const AddDM = (props) => {
             </div>
 
             {/* List of Users */}
-            <div className='flex flex-col grow w-full Scrollbar scrollbar-dark-gray bg-[#292a33]'>
+            <div className={`flex flex-col grow ${defaultWidth} md:w-full Scrollbar scrollbar-dark-gray bg-[#292a33]`}>
                     {getArrayReversed(dmUserList).map((user) => {
                         // let offlineUserColor = "text-[#292a33]";
                         // const setOfflineUserColor = () => {
@@ -118,7 +134,7 @@ const AddDM = (props) => {
                         
                         return (
                             <div 
-                                className={`flex flex-row h-10 w-full bg-[gray] border-b-[1px] border-[black] hover:cursor-pointer hover:bg-[#292a33]`}
+                                className={`flex flex-row h-10 ${defaultWidth} md:w-full bg-[gray] border-b-[1px] border-[black] hover:cursor-pointer hover:bg-[#292a33]`}
                                 onMouseEnter={() => onMouseEnterOfflineUser()}
                                 onMouseLeave={() => onMouseLeaveOfflineUser()}
                                 onClick={()=> {onClickUser(user)}}
