@@ -10,12 +10,12 @@ import io from "socket.io-client";
 import { logoutUser, } from '../helper/MessageMaker';
 import MainWindow from './MainScreen/MainWindow';
 import { MessageType } from "../constants";
-const CHAT_SERVER_ENDPOINT = "http://localhost:443";
-// const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
+// const CHAT_SERVER_ENDPOINT = "http://localhost:443";
+const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
 // import { dmChannelMap, userMap } from "../data"
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
-console.log("MainChatScreenWidth: " + WINDOW_WIDTH + ", " + WINDOW_HEIGHT);
+// console.log("MainChatScreenWidth: " + WINDOW_WIDTH + ", " + WINDOW_HEIGHT);
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
 let dmUserSelected = null;
 let currentUserDms = [];
