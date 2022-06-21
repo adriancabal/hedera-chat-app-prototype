@@ -186,189 +186,19 @@ const App = () => {
     //   // dataController(data);
     // });
 
-    // socket.on("ChatMessages", message => {
-    //     console.log("on chatMessages...: ", message);
-    //     console.log("myMessages: ", myMessages);
-    //     let _myMessages =[...myMessages];
-    //     _myMessages.push(message);
-    //     setMyMessages(_myMessages);
-    //     // console.log("messageTimestamp: ", message.consensusTimestamp.seconds.low);
-    //     // const messageAsString = Buffer.from(message.contents, "utf8").toString();
-    //     // chatMessageController(messageAsString);
-    // });
-
   }, []);
-
-  // Establish topic connection
-  // const initializeDataTopicConnection = async () => {
-  //   console.log("initializingDataTopicConnection...");
-  //   try {
-  //      new TopicMessageQuery()
-  //       .setTopicId("0.0.34717180")
-  //       // 'May 7, 2022 10:15:30'
-  //       .setStartTime(new Date('May 18, 2022 13:50:30'))
-  //       .subscribe(client, null, (message) => {
-  //           let messageAsString = Buffer.from(message.contents, "utf8").toString();
-  //           dataController(messageAsString);
-            
-  //           console.log(`${message.consensusTimestamp.toDate()} Received: ${messageAsString}`);
-  //       });
-  //   }
-  //   catch(err){
-  //       console.log("err!: ", err);
-  //   }
-  // }
-
-  const dataController = (message) => {
-    
-    const msgObj = JSON.parse(message);
-    const msgType = msgObj.type;
-    // console.log("topicMsg: " + topicMsg);
-    console.log("userMap: ", userMap);
-    // console.log("msgObj: ", msgObj);
-    // console.log("userList: ", userList);
-    if(msgType === UserAction.NEW_USER){
-        const user = msgObj.user;
-        if(!userMap[user]){
-          let _userMap = {...userMap};
-          _userMap[user] = {
-              pw: msgObj.pw, 
-              dms:[],
-              groups: [],
-              isLoggedIn: false,
-          };
-          let _userList = [...userList];
-          _userList.push(user);
-          setUserMap(_userMap);
-          setUserList(_userList);
-            // userListTemp.push(user);
-            // console.log("userMap2: ", userMapTemp);
-            // console.log("userList2: ", userListTemp);
-            // dispatch(setUserMap(userMapTemp));
-            // dispatch(setUserList(userListTemp));
-        }
-    }
-    else if(msgType === UserAction.NEW_DM){
-        const channel = msgObj.channel;
-        const user1 = msgObj.user1;
-        const user2 = msgObj.user2;
-        if(!dmChannelMap[channel] && !groupChannelMap[channel]){
-            // let dmChannelMapTemp = {...dmChannelMap};
-            let _dmChannelMap = {...dmChannelMap};
-            _dmChannelMap[channel] = {
-                users: [user1, user2],
-            };
-
-            let _dmChannelList = [...dmChannelList];
-            _dmChannelList.unshift(channel);
-
-            let _userMap = {...userMap};
-            _userMap[user1].dms.unshift([user2, channel]);
-            _userMap[user2].dms.unshift([user1, channel]);
-
-            setDmChannelMap(_dmChannelMap);
-            setDmChannelList(_dmChannelList);
-            setUserMap(_userMap);
-            setChannelIndex(channel);
-            // dispatch(setUserMap(userMapTemp));
-            // dispatch(setDmChannelList(dmChannelListTemp));
-            // dispatch(setDmChannelMap(dmChannelMapTemp))
-        };
-    }
-    else if(msgType === UserAction.NEW_GROUP){
-        const channel = msgObj.channel;
-        if(!groupChannelMap[channel] && !dmChannelMap[channel]){
-            const groupUsers = msgObj.users;
-            // let groupChannelMapTemp = {...groupChannelMap};
-            // let groupChannelListTemp = [...groupChannelList];
-            // let userMapTemp = {...userMap};
-            groupChannelMap[channel] = {
-                creator: msgObj.creator,
-                name: msgObj.name,
-                users: groupUsers,
-            };
-            groupChannelList.unshift(channel);
-            groupUsers.forEach(user => userMap[user].groups.unshift(channel));
-            setChannelIndex(channel);
-            // dispatch(setGroupChannelMap(groupChannelMapTemp))
-            // dispatch(setGroupChannelList(groupChannelListTemp));
-            // dispatch(setUserMap(userMapTemp));
-        };
-    }
-    else if(msgType === UserAction.DELETE_GROUP){
-        const channel = msgObj.channel;
-        const groupChannel = groupChannelMap[channel];
-        if(groupChannel && msgObj.sender === groupChannel.creator){
-            const groupUsers = groupChannel.users;
-            // let groupChannelMapTemp = {...groupChannelMap};
-            delete groupChannelMap[channel];
-
-            // let groupChannelListTemp = [...groupChannelList];
-            const groupListIndex = groupChannelList.indexOf(channel);
-            if(groupListIndex > -1){
-              groupChannelList.splice(groupListIndex, 1);
-            }
-
-            // let deletedChannelListTemp = [...deletedChannelList];
-            deletedChannelList.push(channel);
-
-            // let userMapTemp = {...userMap};
-            groupUsers.forEach(user => {
-                const index = userMap[user].channels.indexOf(channel);
-                if(index > -1){
-                  userMap[user].channels.splice(index, 1);
-                }
-            });
-
-            if(channel === channelIndex){
-              const maxIndex = Math.max(...groupChannelList);
-              let _channelIndex =  maxIndex!==-Infinity && !isNaN(maxIndex) ? maxIndex : 0;
-              setChannelIndex(_channelIndex);
-            }
-
-            // dispatch(setGroupChannelMap(groupChannelMapTemp))
-            // dispatch(setGroupChannelList(groupChannelListTemp));
-            // dispatch(setDeletedChannelList(deletedChannelListTemp));
-            // dispatch(setUserMap(userMapTemp));
-
-        };
-    }
-    else if(msgType === UserAction.LOGIN){
-        let _userMap = {...userMap};
-        // console.log("UserAction.Login:userMapTemp: ", userMapTemp);
-        if(_userMap[msgObj.user]){
-          // let userTemp = userMapTemp[msgObj.user];
-          _userMap[msgObj.user].isLoggedIn = true;
-          setUserMap(_userMap);
-          // userMap[msgObj.user] = {
-          //   ...userTemp,
-          //   isLoggedIn: true,
-          // };
-          // dispatch(setUserMap(userMapTemp));
-        }
-        
-    }
-    else if(msgType === UserAction.LOGOUT){
-        let _userMap = {...userMap};
-        if(_userMap[msgObj.user]){
-          _userMap[msgObj.user].isLoggedIn = false;
-          setUserMap(_userMap);
-          // dispatch(setUserMap(userMapTemp));
-        }
-    }
-
-  }
-
+  
+  console.log("clientHeight: " + document.documentElement.clientHeight);
   const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
   // const screenWidth = `w-[${window.screen.width}px]`;
   // const screenHeight = `w-[${window.screen.height}px]`;
   // ${defaultHeight}
   const mdWindowHeight = "md:" + windowHeight;
   console.log("App-WindowWidth2: " + windowWidth);
-  const mainViewStyle = "flex flex-1 " + bodyMarginTop +  " justify-center h-full md:h-[2000px] " + windowWidth + " bg-[blue] self-center";
+  const mainViewWidth = !!currentUser ? "w-screen" : "w-[350px]";
   return (
     <div className={`flex flex-col bg-[black] w-screen h-screen`}>
-      { Object.keys(currentDmUser).length === 0 &&
+      { currentDmUser && Object.keys(currentDmUser).length === 0 &&
         <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
           <p className="text-center text-white text-2xl md:text-4xl">
             Chat App Prototype
@@ -382,7 +212,7 @@ const App = () => {
         !!!currentUser && isNewAccountCreated &&
         <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
       }
-      <div className={"flex flex-1 " + bodyMarginTop +  " justify-center h-full md:h-[2000px] w-[350px] self-center"}>
+      <div className={`flex flex-1  ${bodyMarginTop}  justify-center h-full md:h-[2000px] ${mainViewWidth} self-center`}>
         
         { 
           !!currentUser 

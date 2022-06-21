@@ -3,6 +3,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import CircleIcon from '@mui/icons-material/Circle';
 import AppContext from "../../../AppContext";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import Lottie from "lottie-react";
+// import tridotAnimation from "../../../animations/tridot-loading-spinner.json";
+// import dotsLoadingAnimation from "../../../animations/3-dots-loading.json";
+import yarnLoadingAnimation from "../../../animations/yarn-loading-saving.json";
 // import { userList, userMap } from "../../../data";
 const WINDOW_WIDTH = window.innerWidth;
 const AddDM = (props) => {
@@ -11,6 +15,7 @@ const AddDM = (props) => {
     const [allUsers, setAllUsers] = useState([]);
     const [dmUserList, setDmUserList] = useState(allUsers);
     const [offlineUserColor, setOfflineUserColor] = useState([null]);
+    const [isLoading, setIsLoading] = useState(true);
     const setMainWindow = props.setMainWindow;
     // const setCurrentDmUser = props.setCurrentDmUser;
 
@@ -22,6 +27,10 @@ const AddDM = (props) => {
             console.log("AddDM: getAllUsers_response: ", allUsersList);
             setDmUserList(allUsersList);
             setAllUsers(allUsersList);
+            setTimeout(()=> {
+                setIsLoading(false);
+            }, 50);
+            
             // const dmUsers = JSON.parse(response).myDms;
             // console.log("getDMUsers_response: ", dmUsers );
             // setUserDms(response);
@@ -76,7 +85,7 @@ const AddDM = (props) => {
 
     return ( 
         <div 
-            className={`flex flex-col h-full ${defaultWidth} md:w-full`}
+            className={`flex flex-col h-full ${defaultWidth} md:w-full justify-center`}
             // onFocus={(e) => {
             //     console.log('Focused on input');
             //     dataSocket.emit("getAllUsers", currentUser);
@@ -86,6 +95,13 @@ const AddDM = (props) => {
             //     });
             // }}
         >
+            {
+                isLoading ?
+                <div className="w-[200px] h-[200px] self-center mb-32">
+                    <Lottie animationData={yarnLoadingAnimation} loop={true} autoplay={true}/>
+                </div>
+                :
+                <>
             {/* Search for DMs */}
             <div className={`flex flex-row ${defaultWidth} md:w-full md:justify-center h-14 bg-[#292a33] border-y-[1px] border-[gray] text-white`}>
                 {WINDOW_WIDTH <= 768 &&
@@ -113,42 +129,45 @@ const AddDM = (props) => {
             </div>
 
             {/* List of Users */}
-            <div className={`flex flex-col grow ${defaultWidth} md:w-full Scrollbar scrollbar-dark-gray bg-[#292a33]`}>
-                    {getArrayReversed(dmUserList).map((user) => {
-                        // let offlineUserColor = "text-[#292a33]";
-                        // const setOfflineUserColor = () => {
-                        //     offlineUserColor = "text-[white]";
-                        //     return "bg-[#292a33]";
-                        // }
-                        const isUserOnline = user.isLoggedIn;
-                        // const isUserOnline = userMap[user].isLoggedIn;
-                        const userColor =  isUserOnline ? "text-[#0be633]" : offlineUserColor[0] === user.user ? "text-[white]" : "text-[#292a33]";
-                        const onMouseEnterOfflineUser = () => {
-                            if(!isUserOnline){
-                                setOfflineUserColor([user.user, "text-[white]"]);
+            
+                <div className={`flex flex-col grow ${defaultWidth} md:w-full Scrollbar scrollbar-dark-gray bg-[#292a33]`}>
+                        {getArrayReversed(dmUserList).map((user) => {
+                            // let offlineUserColor = "text-[#292a33]";
+                            // const setOfflineUserColor = () => {
+                            //     offlineUserColor = "text-[white]";
+                            //     return "bg-[#292a33]";
+                            // }
+                            const isUserOnline = user.isLoggedIn;
+                            // const isUserOnline = userMap[user].isLoggedIn;
+                            const userColor =  isUserOnline ? "text-[#0be633]" : offlineUserColor[0] === user.user ? "text-[white]" : "text-[#292a33]";
+                            const onMouseEnterOfflineUser = () => {
+                                if(!isUserOnline){
+                                    setOfflineUserColor([user.user, "text-[white]"]);
+                                }
                             }
-                        }
-                        const onMouseLeaveOfflineUser = () => {
-                            setOfflineUserColor([null])
-                        }
-                        
-                        return (
-                            <div 
-                                className={`flex flex-row h-10 ${defaultWidth} md:w-full bg-[gray] border-b-[1px] border-[black] hover:cursor-pointer hover:bg-[#292a33]`}
-                                onMouseEnter={() => onMouseEnterOfflineUser()}
-                                onMouseLeave={() => onMouseLeaveOfflineUser()}
-                                onClick={()=> {onClickUser(user)}}
-                            >
-                                <div className='flex flex-col w-8 justify-center '>
-                                    <CircleIcon className={`self-center ${userColor}`} fontSize=''/>
+                            const onMouseLeaveOfflineUser = () => {
+                                setOfflineUserColor([null])
+                            }
+                            
+                            return (
+                                <div 
+                                    className={`flex flex-row h-10 ${defaultWidth} md:w-full bg-[gray] border-b-[1px] border-[black] hover:cursor-pointer hover:bg-[#292a33]`}
+                                    onMouseEnter={() => onMouseEnterOfflineUser()}
+                                    onMouseLeave={() => onMouseLeaveOfflineUser()}
+                                    onClick={()=> {onClickUser(user)}}
+                                >
+                                    <div className='flex flex-col w-8 justify-center '>
+                                        <CircleIcon className={`self-center ${userColor}`} fontSize=''/>
+                                    </div>
+                                    <p className={`self-center font-bold ${userColor} `}>{user.user}</p>
                                 </div>
-                                <p className={`self-center font-bold ${userColor} `}>{user.user}</p>
-                            </div>
-                        )
-                       
-                    }   
-                    )}
-            </div>
+                            )
+                        
+                        }   
+                        )}
+                </div>
+                </>
+            }
 
 
         </div>

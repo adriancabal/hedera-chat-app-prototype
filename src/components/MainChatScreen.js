@@ -252,7 +252,7 @@ const MainChatScreen = (props) => {
            
             <div className={`flex md:flex-row flex-col md:h-[8%] md:w-[1000px] ${defaultWidth} rounded-md`}>
                 {/* Logout */}
-                <div className={`flex flex-row md:w-1/5 justify-center`}>
+                <div className={`flex flex-row md:w-1/5 justify-center h-12 sm:h-7`}>
                     <button 
                         className='text-lg font-bold text-[#f23f69] '
                         onClick={() => {onClickLogout()}}
@@ -262,7 +262,7 @@ const MainChatScreen = (props) => {
                 </div>
 
                 {/* User online */}
-                <div className={`flex flex-row md:w-4/5 justify-center`}>
+                <div className={`flex flex-row md:w-4/5 justify-center sm:h-7 h-12`}>
                     <p className='text-lg text-[#3ff281] self-center'>
                         <span className='font-bold'>{`${currentUser}`}</span>
                         {` - is logged in`}

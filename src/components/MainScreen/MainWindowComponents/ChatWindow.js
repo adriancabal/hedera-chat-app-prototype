@@ -3,10 +3,14 @@ import { useSelector } from 'react-redux';
 import SendIcon from '@mui/icons-material/Send';
 import CircleIcon from '@mui/icons-material/Circle';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import Lottie from "lottie-react";
+// import loadingAnimation from "../../../animations/loading.json";
+import dotsLoadingAnimation from "../../../animations/3-dots-loading.json";
 import AppContext from "../../../AppContext";
 // import { userMap, dmChannelList, dmChannelMap, setChannelIndex } from '../../../data';
 import { TopicMessageSubmitTransaction} from "@hashgraph/sdk";
 import { newDm, sendDM } from '../../../helper/MessageMaker';
+
 // import { channelIndex, deletedChannelList } from '../../../data';
 import { MessageType } from '../../../constants';
 // import { setDmChannelList, setDmChannelMap } from '../../../redux/channelsSlice';
@@ -32,6 +36,7 @@ const ChatWindow = (props) => {
     const [dmChannelMsgIndexes, setDmChannelMsgIndexes] = useState([]);
     const [isCursorTextbox, setIsCursorTextbox] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const messageInputBox = useRef(null);
 
     useEffect(() => {
@@ -43,6 +48,7 @@ const ChatWindow = (props) => {
             const dmMsgIndexes = Object.keys(dmMessagesMapResponse).reverse();
             setDmChannelMessagesMap(dmMessagesMapResponse);
             setDmChannelMsgIndexes(dmMsgIndexes);
+            setIsLoading(false);
             // dataSocket.removeAllListeners("getDMUsers_response");
         });
         
@@ -51,6 +57,7 @@ const ChatWindow = (props) => {
     useEffect(() => {
         console.log("ChatWindow - currentDmMessages changed: ", currentDmMessages);
         if(currentDmMessages.length > 0){
+            
             let _dmChannelMessagesMap = {...dmChannelMessagesMap};
             let _dmChannelMsgIndexes = [...dmChannelMsgIndexes];
             for(let i=0; i < currentDmMessages.length; i++){
@@ -433,7 +440,7 @@ const ChatWindow = (props) => {
     // const defaultWidth = "w-full";
 
     return (
-        <div className={`flex flex-1 flex-col md:w-[768px] md:h-[1000px] w-[350px] h-[100px]`}>
+        <div className={`flex flex-1 flex-col md:w-[768px] md:h-[300px] w-screen h-[100px]`}>
             <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
                 
                 {WINDOW_WIDTH <= 768 &&
@@ -452,112 +459,119 @@ const ChatWindow = (props) => {
                 <p className='self-center font-bold text-white ml-2'>{dmUser.user}</p>
             </div>
 
+            { isLoading ?
+                <Lottie animationData={dotsLoadingAnimation} loop={true} autoplay={true}/>
+                :
+                <>
+                <div className={`flex flex-col-reverse md:w-full ${defaultWidth} md:h-[200px] h-[420px] bg-[transparent] scrollbar-dark-gray grow`}>
+                    
+                    {
+                        // myMessages[dmUser.channel].msgList.map(messageIndex => {
+                        // messages.map(messageIndex => {
+                        dmChannelMsgIndexes.map(messageIndex => {
+                            
+                            // const myMessage = myMessages[dmUser.channel].msgMap[messageIndex];
+                            let myMessage = dmChannelMessagesMap[messageIndex];
+                            if(messageIndex === 0){
+                                myMessage = {
+                                msg: `# Beginning of your chat with ${dmUser.user} `,
+                                } ;
+                            }
+                            console.log("myMessage: ", myMessage);
+                            const sender = myMessage.sender;
+                            //timestamp
+                            let messageTimestamp;
+                            let date;
+                            let hours;
+                            let minutes;
+                            let meridian;
+                            let month;
+                            let dayOfWeek;
+                            let dayOfMonth;
+                            let year;
+                            if(sender){
+                                messageTimestamp = myMessage.timestamp;
+                                date = new Date(messageTimestamp);
+                                const modHour = date.getHours() % 12;
+                                hours = modHour === 0 ? 12 : modHour;
+                                minutes = date.getMinutes();
+                                minutes = minutes < 10 ? "0" + minutes : minutes;
+                                meridian = date.getHours() < 12 ? "am" : "pm";
 
-            <div className={`flex flex-col-reverse md:w-full ${defaultWidth} h-[420px] bg-[transparent] scrollbar-dark-gray grow`}>
-                
-                {
-                    // myMessages[dmUser.channel].msgList.map(messageIndex => {
-                    // messages.map(messageIndex => {
-                    dmChannelMsgIndexes.map(messageIndex => {
-                        
-                        // const myMessage = myMessages[dmUser.channel].msgMap[messageIndex];
-                        let myMessage = dmChannelMessagesMap[messageIndex];
-                        if(messageIndex === 0){
-                            myMessage = {
-                               msg: `# Beginning of your chat with ${dmUser.user} `,
-                            } ;
-                        }
-                        console.log("myMessage: ", myMessage);
-                        const sender = myMessage.sender;
-                        //timestamp
-                        let messageTimestamp;
-                        let date;
-                        let hours;
-                        let minutes;
-                        let meridian;
-                        let month;
-                        let dayOfWeek;
-                        let dayOfMonth;
-                        let year;
-                        if(sender){
-                            messageTimestamp = myMessage.timestamp;
-                            date = new Date(messageTimestamp);
-                            const modHour = date.getHours() % 12;
-                            hours = modHour === 0 ? 12 : modHour;
-                            minutes = date.getMinutes();
-                            minutes = minutes < 10 ? "0" + minutes : minutes;
-                            meridian = date.getHours() < 12 ? "am" : "pm";
+                                dayOfWeek = date.getDay();
+                                dayOfMonth = date.getDate();
+                                month = date.getMonth();
+                                year = date.getFullYear();
 
-                            dayOfWeek = date.getDay();
-                            dayOfMonth = date.getDate();
-                            month = date.getMonth();
-                            year = date.getFullYear();
+                            }
 
-                        }
-
-                        
-                        const msgSenderColor = myMessage.sender === currentUser ? "text-[#3ff281]" : "text-[#3edced]";
-                        const msgTimeColor = myMessage.sender === currentUser ? "text-[#a4edba]" : "text-[#9fe5ed]";
-                        return (
-                            <div className={`flex flex-col md:w-full ${defaultMsgWidthStyle} border-t-[1px] border-[gray] p-2`}>
-                                {
-                                    !!sender &&
-                                    <div className={`flex flex-auto flex-row md:w-full ${defaultMsgWidthStyle} h-8`}>
-                                        <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
-                                        <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
-                                        <div className='flex flex-row ml-0 grow justify-end '>
-                                            <p className={`text-white `}>{`${DAYS_OF_WEEK[dayOfWeek]}, ${month+1}-${dayOfMonth}-${year}`}</p>
+                            
+                            const msgSenderColor = myMessage.sender === currentUser ? "text-[#3ff281]" : "text-[#3edced]";
+                            const msgTimeColor = myMessage.sender === currentUser ? "text-[#a4edba]" : "text-[#9fe5ed]";
+                            return (
+                                <div className={`flex flex-col md:w-full ${defaultMsgWidthStyle} border-t-[1px] border-[gray] p-2`}>
+                                    {
+                                        !!sender &&
+                                        <div className={`flex flex-auto flex-row md:w-full ${defaultMsgWidthStyle} h-8`}>
+                                            <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
+                                            <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
+                                            <div className='flex flex-row ml-0 grow justify-end '>
+                                                <p className={`text-white `}>{`${DAYS_OF_WEEK[dayOfWeek]}, ${month+1}-${dayOfMonth}-${year}`}</p>
+                                            </div>
+                                            
                                         </div>
-                                        
+                                    }
+                                    
+                                    <div className={`flex flex-auto flex-col md:w-full ${defaultMsgWidthStyle} grow  break-words`}>
+                                        {/* {message.message} */}
+                                        <p className={`flex flex-auto grow md:w-full ${defaultMsgWidthStyle} text-white break-words line-clamp-6 `}>{myMessage.msg}</p>
                                     </div>
-                                }
-                                
-                                <div className={`flex flex-auto flex-col md:w-full ${defaultMsgWidthStyle} grow  break-words`}>
-                                    {/* {message.message} */}
-                                    <p className={`flex flex-auto grow md:w-full ${defaultMsgWidthStyle} text-white break-words line-clamp-6 `}>{myMessage.msg}</p>
+                                    
                                 </div>
-                                
+                            )
+                        })
+                    }
+                    {
+                        Object.keys(dmChannelMessagesMap).length === 0 && 
+                        <div className={`flex md:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
+                            <div className='flex flex-row w-full h-8'>
+                                <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
                             </div>
-                        )
-                    })
-                }
-                {
-                    Object.keys(dmChannelMessagesMap).length === 0 && 
-                    <div className={`flex md:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
-                        <div className='flex flex-row w-full h-8'>
-                            <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
                         </div>
+                    }
+                </div>
+            
+
+                {   isTyping &&
+                    <div className={`flex  flex-row md:w-full ${defaultWidth} h-[20px] text-[#3edced]`}>
+                        <p className="ml-3">{`${dmUser.user} typing...`}</p>
                     </div>
                 }
-            </div>
 
-            {   isTyping &&
-                <div className={`flex flex-auto flex-row md:w-full ${defaultWidth} h-[20px] text-[#3edced]`}>
-                    <p className="ml-3">{`${dmUser.user} typing...`}</p>
+                <div className={`flex flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
+                    <input
+                        autoComplete={"off"}
+                        className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"
+                        type="text" 
+                        name="send-message" 
+                        placeholder={"write a message"}
+                        value={messageInputValue}
+                        onChange={e => {
+                            onChangeMessageInput(e.target.value);
+                        }}
+                        onKeyDownCapture={onKeyDownHandler}
+                        ref={messageInputBox}
+                    />
+                    <div 
+                        className={`flex text-white w-12 h-10 self-center justify-center ${sendButtonHoverCursor} ${sendButtonBgColor}`}
+                        onClick={() => onClickSend() }
+                    >
+                        <SendIcon className='self-center'/>
+                    </div>
                 </div>
+                </>
             }
 
-            <div className={`flex flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
-                <input
-                    autoComplete={"off"}
-                    className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"
-                    type="text" 
-                    name="send-message" 
-                    placeholder={"write a message"}
-                    value={messageInputValue}
-                    onChange={e => {
-                        onChangeMessageInput(e.target.value);
-                    }}
-                    onKeyDownCapture={onKeyDownHandler}
-                    ref={messageInputBox}
-                />
-                <div 
-                    className={`flex text-white w-12 h-10 self-center justify-center ${sendButtonHoverCursor} ${sendButtonBgColor}`}
-                    onClick={() => onClickSend() }
-                >
-                    <SendIcon className='self-center'/>
-                </div>
-            </div>
         </div>
 );
         
