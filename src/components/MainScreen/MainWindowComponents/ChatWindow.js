@@ -19,7 +19,7 @@ const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 var lastTypedTimestamp = 0;
 var isMeTyping = false;
 var WINDOW_WIDTH = window.innerWidth;
-
+var WINDOW_HEIGHT = window.innerHeight;
 const ChatWindow = (props) => {
     const { currentUser, hederaClient, myMessages, typingStatus, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
@@ -424,12 +424,15 @@ const ChatWindow = (props) => {
     console.log("$isTyping: " + isTyping);
     // const windowWidth2 = windowWidth/2;
     const defaultMsgWidth = WINDOW_WIDTH - 10;
-    const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+    const windowWidth = WINDOW_WIDTH;
+    const mdDefaultHeight = "h-[" + WINDOW_HEIGHT + "px]";
+
+    const defaultWidth = "w-[" + WINDOW_WIDTH + "px]";
     const defaultMsgWidthStyle = `w-[${defaultMsgWidth}px]`;
     // const defaultWidth = "w-full";
 
     return (
-        <div className={`flex flex-1 flex-col md:w-full ${defaultWidth} h-full`}>
+        <div className={`flex flex-1 flex-col ${mdDefaultHeight} ${defaultWidth} h-full`}>
             <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
                 
                 {WINDOW_WIDTH <= 768 &&

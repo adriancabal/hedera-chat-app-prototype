@@ -286,10 +286,10 @@ const Login = (props) => {
         setErrorMessage('');
     }
 
-    const defaultWidth = "w-[" + 300 + "px]";
+    // const defaultWidth = "w-[" + 350 + "px]";
 
     return (
-        <div className={`flex flex-col ${defaultWidth} ${modalColor} h-96 w-96 rounded-xl`}>
+        <div className={`flex flex-col w-[350px] ${modalColor} h-96 w-96 rounded-xl`}>
             {   isLoading &&
                 <img src={logo} className="App-logo" alt="logo" />
             }

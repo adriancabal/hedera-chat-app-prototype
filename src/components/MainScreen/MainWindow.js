@@ -2,7 +2,7 @@ import AllMessages from "./MainWindowComponents/AllMessages";
 import AddDM from "./MainWindowComponents/AddDM";
 import ChatWindow from "./MainWindowComponents/ChatWindow";
 // import AppContext from "../../AppContext";
-
+const WINDOW_WIDTH = window.innerWidth;
 const MainWindow = (props) => {
     const mainWindow = props.mainWindow;
     const setMainWindow = props.setMainWindow;
@@ -12,7 +12,7 @@ const MainWindow = (props) => {
     // const setMyMessages = props.setMyMessages;
     // const chatSocket = props.chatSocket;
     console.log("mainWindowInnerWidth: " + window.innerWidth);
-    const defaultMainWindowWidth = mainWindow ? `w-[${window.innerWidth}px]` : "w-0";
+    const defaultMainWindowWidth = mainWindow ? `w-[${WINDOW_WIDTH}px]` : "w-0";
     return(
         <div className={`flex flex-auto flex-col bg-[#343d33] h-full md:w-4/5 ${defaultMainWindowWidth}`}>
             {/* All Messages */}

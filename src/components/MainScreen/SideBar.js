@@ -50,7 +50,9 @@ const SideBar = (props) => {
 
     console.log("Sidebar-dmUserUnreadMsgs: " + unreadMsgs["user2"]);
     // const onClickDMAddmary
-    const defaultSideBarWidth = mainWindow ? "w-0" : `w-full`;
+    const windowWidth = WINDOW_WIDTH;
+    const windowWidthStyle = "w-[" + windowWidth + "px]";
+    const defaultSideBarWidth = mainWindow ? "w-0" : "w-full";
     return (
         <div className={`flex-col flex-none  h-full md:w-1/5 ${defaultSideBarWidth} Scrollbar custom-scrollbar`} >
 

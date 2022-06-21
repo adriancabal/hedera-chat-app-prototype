@@ -241,8 +241,8 @@ const MainChatScreen = (props) => {
         
         // console.log("myMessages: ", myMessages);
     }
-    
-    const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
+    const windowWidth = WINDOW_WIDTH;
+    const defaultWidth = "w-[" + WINDOW_WIDTH + "px]";
     const defaultHeight = `w-[${WINDOW_HEIGHT}px]`;
     console.log("defaultWidthMCS: " + defaultWidth);
 

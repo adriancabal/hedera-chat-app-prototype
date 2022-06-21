@@ -34,6 +34,8 @@ let client = null;
 
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
+// const defaultWidth = "w-[" + WINDOW_WIDTH + "px]";
+// const defaultHeight = "w-[" + WINDOW_HEIGHT + "px]";
 console.log("App-WindowWidth: " + WINDOW_WIDTH);
 
 const App = () => {
@@ -51,6 +53,8 @@ const App = () => {
   const [groupChannelList, setGroupChannelList] = useState([]);
   const [channelIndex, setChannelIndex] = useState(0);
   const [deletedChannelList, setDeletedChannelList] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(0);
+  const [windowHeight, setWindowHeight] = useState(0);
   // const [myMessages, setMyMessages] = useState([]);
   // const [dataSocket, setDataSocket] = useState(null);
 
@@ -69,8 +73,18 @@ const App = () => {
   // const dmChannelList = useSelector((state) => state.channels.dmChannelList);
   // const groupChannelList = useSelector((state) => state.channels.groupChannelList);
   // const hederaClient = useSelector((state) => state.user.hederaClient);
-
+  const handleResize = () => {
+    console.log("handleResize");
+    setWindowWidth("w-[" + window.screen.width + "px]");
+    setWindowHeight("h-[" + window.screen.height + "px]");
+  }
+  
   useEffect(() => {
+    console.log("window.screen: " + window.screen.width + ", " + window.screen.height);
+    window.addEventListener("resize", handleResize);
+    console.log("App-WindowWidth1: " + window.innerWidth + ", " + window.innerHeight);
+    setWindowWidth("w-[" + (window.screen.width - 20) + "px]");
+    setWindowHeight("h-[" + window.screen.height + "px]");
     console.log("AppContext: ", currentUser);
     console.log("APP.JS useeffect");
 
@@ -346,34 +360,59 @@ const App = () => {
   }
 
   const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
-  const defaultWidth = `w-[${WINDOW_WIDTH}px]`;
-  const defaultHeight = `w-[${WINDOW_HEIGHT}px]`;
+  // const screenWidth = `w-[${window.screen.width}px]`;
+  // const screenHeight = `w-[${window.screen.height}px]`;
   // ${defaultHeight}
-  console.log("App-WindowWidth2: " + defaultWidth);
+  const mdWindowHeight = "md:" + windowHeight;
+  console.log("App-WindowWidth2: " + windowWidth);
   return (
-      <div className={`flex flex-col md:w-screen bg-black h-screen md:h-screen `}>
-        <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
-          <p className="text-center text-white text-2xl md:text-4xl">
-            Chat App Prototype
-          </p>
-          <p className="text-center text-white text-sm md:text-md mt-2">
-            powered by Hedera Hashgraph
-          </p>
-        </div>
-        {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
-        {
-          !!!currentUser && isNewAccountCreated &&
-          <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
-        }
-        <div className={`flex ${bodyMarginTop} justify-center ${defaultHeight} md:h-[700px] md:w-[1000px] ${defaultWidth} bg-[black] self-center`}>
-          
-          { 
-            !!currentUser 
-            ? <MainChatScreen />
-            : <Login setNewAccountCreated={setNewAccountCreated}/>
-          }
-        </div>
+    <div className={`flex flex-col bg-[black] w-screen h-screen`}>
+ 
+      <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
+        <p className="text-center text-white text-2xl md:text-4xl">
+          Chat App Prototype
+        </p>
+        <p className="text-center text-white text-sm md:text-md mt-2">
+          powered by Hedera Hashgraph
+        </p>
       </div>
+      {
+        !!!currentUser && isNewAccountCreated &&
+        <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
+      }
+      <div className={`flex  ${bodyMarginTop} justify-center h-full ${mdWindowHeight} ${windowWidth} self-center`}>
+        
+        { 
+          !!currentUser 
+          ? <MainChatScreen />
+          // ? null
+          : <Login setNewAccountCreated={setNewAccountCreated}/>
+        }
+      </div>
+    </div>
+      // <div className={`flex flex-col md:w-screen w-screen max-w-[414px] bg-black h-screen md:h-screen `}>
+      //   <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
+      //     <p className="text-center text-white text-2xl md:text-4xl">
+      //       Chat App Prototype
+      //     </p>
+      //     <p className="text-center text-white text-sm md:text-md mt-2">
+      //       powered by Hedera Hashgraph
+      //     </p>
+      //   </div>
+      //   {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
+      //   {
+      //     !!!currentUser && isNewAccountCreated &&
+      //     <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
+      //   }
+      //   <div className={`flex flex-1 ${bodyMarginTop} justify-center ${defaultHeight} md:h-[700px] md:w-[1000px] w-[414px] bg-[black] self-center max-w-[390px]`}>
+          
+      //     { 
+      //       !!currentUser 
+      //       ? <MainChatScreen />
+      //       : <Login setNewAccountCreated={setNewAccountCreated}/>
+      //     }
+      //   </div>
+      // </div>
   );
 }
 
