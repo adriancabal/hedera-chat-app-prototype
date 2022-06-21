@@ -25,9 +25,9 @@ import AppContext from './AppContext';
 //   channelIndex,
 // } from './data';
 // const ENDPOINT = "http://localhost:8787";
+// const ENDPOINT = "http://192.168.0.59:8880"; //for connect mobile device to desktop localhost
 // const ENDPOINT = "http://localhost:8880";
 const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
-// const ENDPOINT = "http://pacific-spire-35776.herokuapp.com:2052";
 // const ENDPOINT = "https://my-worker.acabal-hedera-data.workers.dev";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
@@ -41,7 +41,7 @@ console.log("App-WindowWidth: " + WINDOW_WIDTH);
 const App = () => {
   // const hederaClient = useSelector((state) => state.user.hederaClient);
   // const { currentUser, setHederaClient, userMap, setUserMap, userList, setUserList, dmChannelList, setDmChannelList, dmChannelMap, setDmChannelMap, groupChannelMap, groupChannelList, deletedChannelList, channelIndex, setChannelIndex} = useContext(AppContext);
-  const {setHederaClient} = useContext(AppContext);
+  const {setHederaClient, currentDmUser} = useContext(AppContext);
   const [userMap, setUserMap] = useState({});
   const [userList, setUserList] = useState([]);
   // const [hederaClient, setHederaClient] = useState(null);
@@ -365,27 +365,28 @@ const App = () => {
   // ${defaultHeight}
   const mdWindowHeight = "md:" + windowHeight;
   console.log("App-WindowWidth2: " + windowWidth);
+  const mainViewStyle = "flex flex-1 " + bodyMarginTop +  " justify-center h-full md:h-[2000px] " + windowWidth + " bg-[blue] self-center";
   return (
-    <div className={`flex flex-col bg-[black] w-screen h-screen`}>
- 
-      <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
-        <p className="text-center text-white text-2xl md:text-4xl">
-          Chat App Prototype
-        </p>
-        <p className="text-center text-white text-sm md:text-md mt-2">
-          powered by Hedera Hashgraph
-        </p>
-      </div>
+    <div className={`flex flex-col bg-[black] w-screen h-screen `}>
+      { Object.keys(currentDmUser).length === 0 &&
+        <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
+          <p className="text-center text-white text-2xl md:text-4xl">
+            Chat App Prototype
+          </p>
+          <p className="text-center text-white text-sm md:text-md mt-2">
+            powered by Hedera Hashgraph
+          </p>
+        </div>
+      }
       {
         !!!currentUser && isNewAccountCreated &&
         <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
       }
-      <div className={`flex  ${bodyMarginTop} justify-center h-full ${mdWindowHeight} ${windowWidth} self-center`}>
+      <div className={"flex flex-1 " + bodyMarginTop +  " justify-center h-full md:h-[2000px] w-[350px] self-center"}>
         
         { 
           !!currentUser 
           ? <MainChatScreen />
-          // ? null
           : <Login setNewAccountCreated={setNewAccountCreated}/>
         }
       </div>

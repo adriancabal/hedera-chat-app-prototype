@@ -10,6 +10,7 @@ import io from "socket.io-client";
 import { logoutUser, } from '../helper/MessageMaker';
 import MainWindow from './MainScreen/MainWindow';
 import { MessageType } from "../constants";
+// const CHAT_SERVER_ENDPOINT = "http://192.168.0.59:443"; // for mobile device localhost connection
 // const CHAT_SERVER_ENDPOINT = "http://localhost:443";
 const CHAT_SERVER_ENDPOINT = "https://arcane-beach-52537.herokuapp.com/";
 // import { dmChannelMap, userMap } from "../data"

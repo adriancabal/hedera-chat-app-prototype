@@ -143,8 +143,8 @@ const ChatWindow = (props) => {
                     const channelIndex = response.channelIndex;
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
-                    // const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
-                    const isSuccess = true;
+                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    // const isSuccess = true;
                     // console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
                     if(isSuccess){
                         // let _dmChannelMap = {...dmChannelMap};
@@ -204,8 +204,8 @@ const ChatWindow = (props) => {
                         // const currentMessageIndex = myMessages[dmUser].msgList.length;
                         // const timestamp = new Date().getTime();
                        
-                        // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
-                        const isSendChatMsgSuccess = true;
+                        const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                        // const isSendChatMsgSuccess = true;
                         console.log("send first message Success: " + isSendChatMsgSuccess);
                         // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
                         // const isSendChatMsgSuccess = true;
@@ -418,6 +418,7 @@ const ChatWindow = (props) => {
 
     const goBackToSideBarView = () => {
         setMainWindow(null);
+        setCurrentDmUser({});
     }
 
     // console.log("ChatWindow-myMessages: ", myMessages[1]);
@@ -432,7 +433,7 @@ const ChatWindow = (props) => {
     // const defaultWidth = "w-full";
 
     return (
-        <div className={`flex flex-1 flex-col ${mdDefaultHeight} ${defaultWidth} h-full`}>
+        <div className={`flex flex-1 flex-col  w-[350px] h-[100px]`}>
             <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
                 
                 {WINDOW_WIDTH <= 768 &&
@@ -452,7 +453,7 @@ const ChatWindow = (props) => {
             </div>
 
 
-            <div className={`flex flex-col-reverse md:w-full ${defaultWidth} h-[650px] bg-[transparent] scrollbar-dark-gray`}>
+            <div className={`flex flex-col-reverse md:w-full ${defaultWidth} h-[420px] bg-[transparent] scrollbar-dark-gray grow`}>
                 
                 {
                     // myMessages[dmUser.channel].msgList.map(messageIndex => {
@@ -536,7 +537,7 @@ const ChatWindow = (props) => {
                 </div>
             }
 
-            <div className={`flex flex-auto flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2`}>
+            <div className={`flex flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
                 <input
                     autoComplete={"off"}
                     className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"
