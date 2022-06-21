@@ -57,12 +57,12 @@ const SideBar = (props) => {
         <div className={`flex-col flex-none  h-full md:w-1/5 ${defaultSideBarWidth} Scrollbar custom-scrollbar`} >
 
             {/* All Messages */}
-            <div 
+            {/* <div 
                 className=' flex flex-row h-12 justify-center bg-[black] border-y-[1px] border-[gray] hover:cursor-pointer hover:bg-[#292a33]'
                 onClick={() => setMainWindow("all")}
             >
-                    <p className='self-center text-white text-sm'>{"All Messages"}</p>
-                </div>
+                <p className='self-center text-white text-sm'>{"All Messages"}</p>
+            </div> */}
             {/* <div className='flex-col justify-center'>
 
             </div> */}

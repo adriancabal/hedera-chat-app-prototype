@@ -334,8 +334,8 @@ const ChatWindow = (props) => {
                 setMessageInputValue("");
                 // setMyMessages(_myMessages);
                 
-                const isSendChatMsgSuccess = true;
-                // const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                // const isSendChatMsgSuccess = true;
+                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
                 // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
 
                 if(isSendChatMsgSuccess){
@@ -433,7 +433,7 @@ const ChatWindow = (props) => {
     // const defaultWidth = "w-full";
 
     return (
-        <div className={`flex flex-1 flex-col  w-[350px] h-[100px]`}>
+        <div className={`flex flex-1 flex-col md:w-[768px] md:h-[1000px] w-[350px] h-[100px]`}>
             <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
                 
                 {WINDOW_WIDTH <= 768 &&

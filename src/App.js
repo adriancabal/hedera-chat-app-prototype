@@ -367,7 +367,7 @@ const App = () => {
   console.log("App-WindowWidth2: " + windowWidth);
   const mainViewStyle = "flex flex-1 " + bodyMarginTop +  " justify-center h-full md:h-[2000px] " + windowWidth + " bg-[blue] self-center";
   return (
-    <div className={`flex flex-col bg-[black] w-screen h-screen `}>
+    <div className={`flex flex-col bg-[black] w-screen h-screen`}>
       { Object.keys(currentDmUser).length === 0 &&
         <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
           <p className="text-center text-white text-2xl md:text-4xl">
