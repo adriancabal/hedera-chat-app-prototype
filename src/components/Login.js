@@ -297,84 +297,78 @@ const Login = (props) => {
             {
             !isLoading &&
             <>
-            <p className='self-center text-3xl text-white mt-8'>
-                {loginType === "login" ? "Login" : "New User"}
-            </p>
-
-            {/* Inputs */}
-            
-            
-            
-            
-            {/* username */}
-            <div className='flex flex-row self-center mt-8'>
-                {/* <div className='flex flex-col  justify-center mr-3'>
-                    <p className='text-white'>{userIdText}</p>
-                </div> */}
-                
-                <input
-                    autoComplete={"off"}
-                    className=' w-64 h-12 bg-white mt'
-                    type="text" 
-                    name="name" 
-                    placeholder={loginType === "login" ? "username" : "new username"}
-                    value={usernameInputValue}
-                    onChange={e => {
-                        onChangeUsernameInput(e.target.value);
-                    }}
-                />
-            </div>
-
-            {/* password */}
-            <div className='flex flex-row self-center mt-8 mb-5'>
-                {/* <div className='flex flex-col  justify-center mr-3'>
-                    <p className='text-white'>{passwordText}</p>
-                </div> */}
-                
-                <input
-                    autoComplete={"off"}
-                    className=' w-64 h-12 bg-white mt'
-                    type={"password"}
-                    name="name" 
-                    placeholder={loginType === "login" ? "password" : "new password"}
-                    value={passwordInputValue}
-                    onChange={e => {
-                        onChangePasswordInput(e.target.value);
-                    }}
-                />
-            </div>
-
-            {/* Error message */}
-            <div className='self-center'>
-                <p className='text-[red] text font-bold'>
-                    {errorMessage}
+                <p className='self-center text-3xl text-white mt-8'>
+                    {loginType === "login" ? "Login" : "New User"}
                 </p>
-            </div>
 
-            {/* Submit Button */}
-            <button 
-                className={`self-center ${buttonColor} h-10 w-48 mt-5`}
-                onClick={()=>{onClickSubmit()}}
-            
-            >
-                {loginType === "login" ? "Login" : "Create New Account"}
-            </button>
-
-
-            {/* Bottom Link suggestion */}
-            <div className='flex flex-row self-center mt-5 mr-6'>
-                <p className='text-white'>
-                    {loginType === "login" ? "New user?" : "Already have an existing account?"}
-                </p>
-                <p 
-                    className='text-white font-bold ml-2 hover:cursor-pointer'
-                    onClick={()=> onClickBottomLink()}
-                >
-                     {loginType === "login" ? "Create an account" : "Log In"}
+                {/* username */}
+                <div className='flex flex-row self-center mt-8'>
+                    {/* <div className='flex flex-col  justify-center mr-3'>
+                        <p className='text-white'>{userIdText}</p>
+                    </div> */}
                     
-                </p>
-            </div>
+                    <input
+                        autoComplete={"off"}
+                        className=' w-64 h-12 bg-white mt rounded'
+                        type="text" 
+                        name="name" 
+                        placeholder={loginType === "login" ? "username" : "new username"}
+                        value={usernameInputValue}
+                        onChange={e => {
+                            onChangeUsernameInput(e.target.value);
+                        }}
+                    />
+                </div>
 
+                {/* password */}
+                <div className='flex flex-row self-center mt-8 mb-5'>
+                    {/* <div className='flex flex-col  justify-center mr-3'>
+                        <p className='text-white'>{passwordText}</p>
+                    </div> */}
+                    
+                    <input
+                        autoComplete={"off"}
+                        className=' w-64 h-12 bg-white mt rounded'
+                        type={"password"}
+                        name="name" 
+                        placeholder={loginType === "login" ? "password" : "new password"}
+                        value={passwordInputValue}
+                        onChange={e => {
+                            onChangePasswordInput(e.target.value);
+                        }}
+                    />
+                </div>
+
+                {/* Error message */}
+                <div className='self-center'>
+                    <p className='text-[red] text font-bold'>
+                        {errorMessage}
+                    </p>
+                </div>
+
+                {/* Submit Button */}
+                <button 
+                    className={`self-center ${buttonColor} h-10 w-48 mt-5 rounded-md`}
+                    onClick={()=>{onClickSubmit()}}
+                
+                >
+                    {loginType === "login" ? "Login" : "Create New Account"}
+                </button>
+
+
+                {/* Bottom Link suggestion */}
+                <div className='flex flex-row self-center mt-5 mr-6'>
+                    <p className='text-white'>
+                        {loginType === "login" ? "New user?" : "Already have an existing account?"}
+                    </p>
+                    <p 
+                        className='text-white font-bold ml-2 hover:cursor-pointer'
+                        onClick={()=> onClickBottomLink()}
+                    >
+                        {loginType === "login" ? "Create an account" : "Log In"}
+                        
+                    </p>
+                </div>
             </>
 
             }
