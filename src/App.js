@@ -197,9 +197,10 @@ const App = () => {
   console.log("App-WindowWidth2: " + windowWidth);
   const mainViewWidth = !!currentUser ? "w-screen" : "w-[350px]";
   return (
-    <div className={`flex flex-col bg-[black] w-screen h-screen`}>
-      { currentDmUser && Object.keys(currentDmUser).length === 0 &&
-        <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
+    <div className={`flex flex-col bg-[black] w-screen h-screen md:h-[1200px]`}>
+      { ((currentDmUser && Object.keys(currentDmUser).length === 0)
+        || (currentDmUser && Object.keys(currentDmUser).length > 0 && window.innerWidth >= 640)) &&
+        <div className={`flex flex-col mt-8 sm:mt-16 sm:mb-16 mb-8 h-20 justify-center bg-[black]`}>
           <p className="text-center text-white text-2xl md:text-4xl">
             Chat App Prototype
           </p>
@@ -212,7 +213,7 @@ const App = () => {
         !!!currentUser && isNewAccountCreated &&
         <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
       }
-      <div className={`flex flex-1  ${bodyMarginTop}  justify-center h-full md:h-[2000px] ${mainViewWidth} self-center`}>
+      <div className={`flex flex-1  ${bodyMarginTop}  justify-center h-full md:h-[800px]  sm:w-[640px] md:w-[768px] lg:w-[1024px] ${mainViewWidth} self-center`}>
         
         { 
           !!currentUser 

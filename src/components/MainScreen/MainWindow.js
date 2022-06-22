@@ -14,7 +14,7 @@ const MainWindow = (props) => {
     console.log("mainWindowInnerWidth: " + window.innerWidth);
     const defaultMainWindowWidth = mainWindow ? `w-[${WINDOW_WIDTH}px]` : "w-0";
     return(
-        <div className={`flex flex-auto flex-col bg-[#343d33] h-full md:w-4/5 ${defaultMainWindowWidth}`}>
+        <div className={`flex flex-auto flex-col bg-[#343d33] h-full sm:w-4/5 ${defaultMainWindowWidth}`}>
             {/* All Messages */}
             {
                 mainWindow === "all" && <AllMessages />

@@ -30,7 +30,7 @@ const MainChatScreen = (props) => {
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
     // const socket = useSelector((state) => state.user.socket);
-    const [mainWindow, setMainWindow] = useState(WINDOW_WIDTH > 768 ? "all" : null);
+    const [mainWindow, setMainWindow] = useState(WINDOW_WIDTH > 768 ? "addDM" : null);
     // const [currentDmUser, setCurrentDmUser] = useState(null);
     // const [myMessages, setMyMessages] = useState({});
     // const [myMessages, setMyMessages] = useState([]);
@@ -248,11 +248,11 @@ const MainChatScreen = (props) => {
     console.log("defaultWidthMCS: " + defaultWidth);
 
     return(
-        <div className={`flex flex-auto flex-col h-full md:w-[1000px] ${defaultWidth} rounded-lg ${chatScreenColor}`}>
+        <div className={`flex flex-auto flex-col h-full sm:h-[800px]  sm:w-[640px] md:w-[768px] lg:w-[1024px] ${defaultWidth} rounded-lg ${chatScreenColor}`}>
            
-            <div className={`flex md:flex-row flex-col md:h-[8%] md:w-[1000px] ${defaultWidth} rounded-md`}>
+            <div className={`flex sm:flex-row flex-col sm:h-[8%] sm:w-[640px] md:w-[768px] lg:w-[1024px] ${defaultWidth} rounded-md`}>
                 {/* Logout */}
-                <div className={`flex flex-row md:w-1/5 justify-center h-12 sm:h-7`}>
+                <div className={`flex flex-row sm:w-1/5 justify-center content-center h-12 sm:h-7 sm:place-self-center`}>
                     <button 
                         className='text-lg font-bold text-[#f23f69] '
                         onClick={() => {onClickLogout()}}
@@ -262,7 +262,7 @@ const MainChatScreen = (props) => {
                 </div>
 
                 {/* User online */}
-                <div className={`flex flex-row md:w-4/5 justify-center sm:h-7 h-12`}>
+                <div className={`flex flex-row sm:w-4/5 justify-center sm:h-7 h-12 sm:place-self-center`}>
                     <p className='text-lg text-[#3ff281] self-center'>
                         <span className='font-bold'>{`${currentUser}`}</span>
                         {` - is logged in`}
@@ -271,7 +271,7 @@ const MainChatScreen = (props) => {
             </div>
 
             {/* Main View */}
-            <div className={`flex flex-row  h-[92%] md:w-[1000px] ${defaultWidth}`}>
+            <div className={`flex flex-row  h-[92%] sm:w-[640px] md:w-[768px] lg:w-[1024px] ${defaultWidth}`}>
                 {/* Scoll sidebar */}
                 <SideBar mainWindow={mainWindow} setMainWindow={setMainWindow} />
                 {/* <SideBar setMainWindow={setMainWindow} setCurrentDmUser={setCurrentDmUser} myMessages={myMessages}/> */}

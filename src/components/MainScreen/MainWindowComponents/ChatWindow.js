@@ -440,8 +440,8 @@ const ChatWindow = (props) => {
     // const defaultWidth = "w-full";
 
     return (
-        <div className={`flex flex-1 flex-col md:w-[768px] md:h-[300px] w-screen h-[100px]`}>
-            <div className={`flex flex-row md:w-full ${defaultWidth} h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
+        <div className={`flex flex-1 flex-col sm:w-full  sm:h-[300px] w-screen h-[100px]`}>
+            <div className={`flex flex-row sm:w-full w-screen h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
                 
                 {WINDOW_WIDTH <= 768 &&
                     <div 
@@ -463,7 +463,7 @@ const ChatWindow = (props) => {
                 <Lottie animationData={dotsLoadingAnimation} loop={true} autoplay={true}/>
                 :
                 <>
-                <div className={`flex flex-col-reverse md:w-full ${defaultWidth} md:h-[200px] h-[420px] bg-[transparent] scrollbar-dark-gray grow`}>
+                <div className={`flex flex-col-reverse sm:w-full ${defaultWidth} sm:h-[200px] h-[420px] bg-[transparent] scrollbar-dark-gray grow`}>
                     
                     {
                         // myMessages[dmUser.channel].msgList.map(messageIndex => {
@@ -509,10 +509,10 @@ const ChatWindow = (props) => {
                             const msgSenderColor = myMessage.sender === currentUser ? "text-[#3ff281]" : "text-[#3edced]";
                             const msgTimeColor = myMessage.sender === currentUser ? "text-[#a4edba]" : "text-[#9fe5ed]";
                             return (
-                                <div className={`flex flex-col md:w-full ${defaultMsgWidthStyle} border-t-[1px] border-[gray] p-2`}>
+                                <div className={`flex flex-col sm:w-full ${defaultMsgWidthStyle} border-t-[1px] border-[gray] p-2`}>
                                     {
                                         !!sender &&
-                                        <div className={`flex flex-auto flex-row md:w-full ${defaultMsgWidthStyle} h-8`}>
+                                        <div className={`flex flex-auto flex-row sm:w-full ${defaultMsgWidthStyle} h-8`}>
                                             <p className={`${msgSenderColor} font-bold mr-1`}>{myMessage.sender}</p>
                                             <p className={`text-[#bcd4cd] ml-2`}>{`${hours}:${minutes} ${meridian}`}</p>
                                             <div className='flex flex-row ml-0 grow justify-end '>
@@ -522,9 +522,9 @@ const ChatWindow = (props) => {
                                         </div>
                                     }
                                     
-                                    <div className={`flex flex-auto flex-col md:w-full ${defaultMsgWidthStyle} grow  break-words`}>
+                                    <div className={`flex flex-auto flex-col sm:w-full ${defaultMsgWidthStyle} grow  break-words`}>
                                         {/* {message.message} */}
-                                        <p className={`flex flex-auto grow md:w-full ${defaultMsgWidthStyle} text-white break-words line-clamp-6 `}>{myMessage.msg}</p>
+                                        <p className={`flex flex-auto grow sm:w-full ${defaultMsgWidthStyle} text-white break-words line-clamp-6 `}>{myMessage.msg}</p>
                                     </div>
                                     
                                 </div>
@@ -533,7 +533,7 @@ const ChatWindow = (props) => {
                     }
                     {
                         Object.keys(dmChannelMessagesMap).length === 0 && 
-                        <div className={`flex md:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
+                        <div className={`flex sm:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
                             <div className='flex flex-row w-full h-8'>
                                 <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
                             </div>
@@ -543,12 +543,12 @@ const ChatWindow = (props) => {
             
 
                 {   isTyping &&
-                    <div className={`flex  flex-row md:w-full ${defaultWidth} h-[20px] text-[#3edced]`}>
+                    <div className={`flex  flex-row sm:w-full ${defaultWidth} h-[20px] text-[#3edced]`}>
                         <p className="ml-3">{`${dmUser.user} typing...`}</p>
                     </div>
                 }
 
-                <div className={`flex flex-row md:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
+                <div className={`flex flex-row sm:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
                     <input
                         autoComplete={"off"}
                         className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"

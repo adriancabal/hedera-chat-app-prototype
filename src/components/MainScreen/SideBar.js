@@ -54,7 +54,7 @@ const SideBar = (props) => {
     const windowWidthStyle = "w-[" + windowWidth + "px]";
     const defaultSideBarWidth = mainWindow ? "w-0" : "w-full";
     return (
-        <div className={`flex-col flex-none  h-full md:w-1/5 ${defaultSideBarWidth} Scrollbar custom-scrollbar`} >
+        <div className={`flex-col flex-none  h-full sm:w-1/5 ${defaultSideBarWidth} Scrollbar custom-scrollbar`} >
 
             {/* All Messages */}
             {/* <div 
