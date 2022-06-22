@@ -533,7 +533,7 @@ const ChatWindow = (props) => {
                     }
                     {
                         Object.keys(dmChannelMessagesMap).length === 0 && 
-                        <div className={`flex sm:w-full ${defaultWidth} border-t-[0px] border-[gray] p-2 pt-4`}>
+                        <div className={`flex sm:w-full ${defaultWidth} border-t-[0px] border-[gray] px-2 pt-4 sm:pb-2 pb-6`}>
                             <div className='flex flex-row w-full h-8'>
                                 <p className={`text-white font-bold`}>{`No message history with ${dmUser.user}. Start a conversation...`}</p>
                             </div>
