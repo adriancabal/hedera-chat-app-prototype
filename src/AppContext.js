@@ -3,7 +3,7 @@ import { UserAction } from "./constants";
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import socketIOClient from "socket.io-client";
 import { current } from "@reduxjs/toolkit";
-import Gun from 'gun';
+import Gun from 'gun/gun';
 const ENDPOINT = "http://localhost:4001";
 const gun = Gun({
     peers: [
