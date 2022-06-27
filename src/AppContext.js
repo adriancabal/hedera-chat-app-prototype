@@ -5,12 +5,12 @@ import socketIOClient from "socket.io-client";
 import { current } from "@reduxjs/toolkit";
 import Gun from 'gun';
 const ENDPOINT = "http://localhost:4001";
-// const gun = Gun({
-//     peers: [
-//         'http://localhost:3030/gun'
-//     ]
-// });
-const gun = Gun('https://still-wave-93003.herokuapp.com/gun');
+const gun = Gun({
+    peers: [
+        'https://still-wave-93003.herokuapp.com/gun'
+    ]
+});
+// const gun = Gun('https://still-wave-93003.herokuapp.com/gun');
 // const gun = Gun('http://localhost:3030/gun'); 
 
 const AppContext = createContext();
