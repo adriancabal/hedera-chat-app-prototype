@@ -23,21 +23,25 @@ const SideBar = (props) => {
             console.log("Sidebar: getDMUsers_response: ", response);
             setUserDms(response);
 
+            
             // get unreads of dmUsers from gun and update it 
-            gunDb.get(`hca-${currentUser}`).get("unread").once((node)=>{
+            const gunCurrentUser = gunDb.get(`hca-${currentUser}`);
+            gunCurrentUser.get("unread").once((node)=>{
                 console.log("sideBarGunCurrentUser: ", node);
                 const unreads = node;
                 let _unreadMsgs = {...unreadMsgs}; 
                 let isUnreads = false;
-                for(let i=0;i<response.length; i++){
-                    if(typeof unreads[response[i].user] === "number" 
-                        && unreads[response[i].user] > 0) {
-                            _unreadMsgs[response[i].channel] = unreads[response[i].user];  
-                            isUnreads = true;
+                if(unreads){
+                    for(let i=0;i<response.length; i++){
+                        if(typeof unreads[response[i].user] === "number" 
+                            && unreads[response[i].user] > 0) {
+                                _unreadMsgs[response[i].channel] = unreads[response[i].user];  
+                                isUnreads = true;
+                        }
                     }
-                }
-                if(isUnreads){
-                    setUnreadMsgs(_unreadMsgs);
+                    if(isUnreads){
+                        setUnreadMsgs(_unreadMsgs);
+                    }
                 }
             });
 
