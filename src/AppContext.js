@@ -4,12 +4,18 @@ import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import socketIOClient from "socket.io-client";
 import { current } from "@reduxjs/toolkit";
 import Gun from 'gun/gun';
-const ENDPOINT = "http://localhost:4001";
+// const ENDPOINT = "http://localhost:4001";
+// const gun = Gun({
+//     peers: [
+//         'https://still-wave-93003.herokuapp.com/gun'
+//     ]
+// });
 const gun = Gun({
     peers: [
-        'https://still-wave-93003.herokuapp.com/gun'
+        'https://shrouded-retreat-54455.herokuapp.com/gun'
     ]
 });
+
 // const gun = Gun('https://still-wave-93003.herokuapp.com/gun');
 // const gun = Gun('http://localhost:3030/gun'); 
 
