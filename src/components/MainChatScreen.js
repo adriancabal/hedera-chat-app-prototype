@@ -21,34 +21,33 @@ const WINDOW_HEIGHT = window.innerHeight;
 let dmUserSelected = null;
 let currentUserDms = [];
 let currentUnreadMsgs = {};
+
 const MainChatScreen = (props) => {
     // const dispatch = useDispatch();
     const {currentUser, setCurrentUser, hederaClient, dataSocket, userDms, setUserDms, myMessages, setMyMessages, chatSocket, setChatSocket} = useContext(AppContext);
     const {currentDmMessages, setCurrentDmMessages, typingStatus, setTypingStatus, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
     // const currentUser = "user1";
-    // const { currentUser, setCurrentUser, hederaClient, userMap, dmChannelMap} = useContext(AppContext);
-    // const currentUser = useSelector((state) => state.user.currentUser);
-    // const hederaClient = useSelector((state) => state.user.hederaClient);
-    // const socket = useSelector((state) => state.user.socket);
+    const { gunDb, gunHederaChatUsers} = useContext(AppContext);
     const [mainWindow, setMainWindow] = useState(WINDOW_WIDTH > 768 ? "addDM" : null);
-    // const [currentDmUser, setCurrentDmUser] = useState(null);
-    // const [myMessages, setMyMessages] = useState({});
-    // const [myMessages, setMyMessages] = useState([]);
-    // const [chatSocket, setChatSocket] = useState(null);
     const chatScreenColor = "bg-[#292a33]";
 
     const onClickLogout = async () => {
         // const logoutSuccessful = sendDataTopicMessage(hederaClient,logoutUser(currentUser));
-        let sendResponse = await new TopicMessageSubmitTransaction({
-            topicId: "0.0.34717180",
-            message: logoutUser(currentUser),
-        })
-        .execute(hederaClient);
-        const getReceipt = await sendResponse.getReceipt(hederaClient);
-        console.log("receiptStatus: " + getReceipt.status);
-        const logoutSuccessful = getReceipt.status._code === 22 ;
+        // let sendResponse = await new TopicMessageSubmitTransaction({
+        //     topicId: "0.0.34717180",
+        //     message: logoutUser(currentUser),
+        // })
+        // .execute(hederaClient);
+        // const getReceipt = await sendResponse.getReceipt(hederaClient);
+        // console.log("receiptStatus: " + getReceipt.status);
+        // const logoutSuccessful = getReceipt.status._code === 22 ;
+        const logoutSuccessful = true;
         console.log("logoutSuccessful: ", logoutSuccessful);
         if(logoutSuccessful){
+            const gunUserKey = `hca-${currentUser}`;
+            gunDb.get(gunUserKey).put({userid: currentUser, isLoggedIn: false});
+            // let gunUser = gunUsers.get(gunUserKey);
+            // gunHederaChatUsers.set(gunUser);
             setCurrentUser("");
             // dispatch(setUser(""));
         }

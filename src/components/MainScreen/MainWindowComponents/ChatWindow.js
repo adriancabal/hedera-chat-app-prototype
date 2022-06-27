@@ -28,7 +28,7 @@ const ChatWindow = (props) => {
     const { currentUser, hederaClient, myMessages, typingStatus, chatSocket, currentDmMessages, currentDmUser: dmUser, resetCurrentDmMessages } = useContext(AppContext);
     // const currentUser = useSelector((state) => state.user.currentUser);
     // const hederaClient = useSelector((state) => state.user.hederaClient);
-    const { dataSocket, userDms, setUserDms, setCurrentDmUser} = useContext(AppContext);
+    const { dataSocket, userDms, setUserDms, setCurrentDmUser, gunDb} = useContext(AppContext);
     // const dmUser = props.currentDmUser;
     const setMainWindow = props.setMainWindow;
     const [messageInputValue, setMessageInputValue] = useState("");
@@ -41,7 +41,9 @@ const ChatWindow = (props) => {
 
     useEffect(() => {
         console.log("ChatWindow useeffect - dmUser: " + dmUser.user);
+        // sendChatTopicMessage(JSON.stringify({type: 9}));
         resetCurrentDmMessages();
+        resetDmUserUnread();
         chatSocket.emit("get_dm_channel_messages", {channel: dmUser.channel, user: currentUser});
         chatSocket.on("getDmChannelMessagesResponse", dmMessagesMapResponse => {
             console.log("getDmChannelMessagesResponse: ", dmMessagesMapResponse);
@@ -51,11 +53,16 @@ const ChatWindow = (props) => {
             setIsLoading(false);
             // dataSocket.removeAllListeners("getDMUsers_response");
         });
+
+
+
+
         
     }, [dmUser]);
 
     useEffect(() => {
         console.log("ChatWindow - currentDmMessages changed: ", currentDmMessages);
+        
         if(currentDmMessages.length > 0){
             
             let _dmChannelMessagesMap = {...dmChannelMessagesMap};
@@ -71,9 +78,11 @@ const ChatWindow = (props) => {
                     _dmChannelMsgIndexes.unshift(newMsg.index);
                     setDmChannelMessagesMap(_dmChannelMessagesMap);
                     setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+                    resetDmUserUnread();
                 }
             }
         }
+        
     }, [currentDmMessages]);
 
     useEffect(() => {
@@ -150,93 +159,63 @@ const ChatWindow = (props) => {
                     const channelIndex = response.channelIndex;
                     //  create new dm channel
                     const newChannel = deletedChannelList.length > 0 ? deletedChannelList[0] : channelIndex + 1;
-                    const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
-                    // const isSuccess = true;
-                    // console.log(`newDM channel: ${newChannel} dmUser: ${dmUser.user} isSuccess: ${JSON.stringify(isSuccess)}`);
-                    if(isSuccess){
-                        // let _dmChannelMap = {...dmChannelMap};
-                        // let _dmChannelList = [...dmChannelList];
-                        // let _userMap = {...userMap};
-                        // console.log("sendChatMsgSuccess to new dmuser");
-                        // // update local data with new dm channel created
-                        // if(deletedChannelList.length > 0){
-                        //     let _deletedChannelList = [...deletedChannelList];
-                        //     _deletedChannelList.shift();
-                        // } else{
-                        //     channelIndex = channelIndex + 1;
-                        // }
-
-
-                        // _dmChannelMap[newChannel] = {
-                        //     users: [currentUser, dmUser],
-                        // };
-                        // _dmChannelList.unshift(newChannel);
-                        // _userMap[currentUser].dms.unshift([dmUser, newChannel]);
-                        // _userMap[dmUser].dms.unshift([currentUser, newChannel]);
-                        // setChannelIndexMax(newChannel);
+                    // const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                    dataSocket.emit("createDmAvailable");
+                    dataSocket.once("createDmAvailable_response", async (response) => {
+                        if(response === true) {
+                            const isSuccess = await sendDataTopicMessage(newDm(newChannel, currentUser, dmUser.user));
+                            // const isSuccess = true;
+                            if(isSuccess){
+                                
+                                
+                                // send DM message
+                                let _dmChannelMessagesMap = {...dmChannelMessagesMap};
+                                let _dmChannelMsgIndexes = [0];
+                                const timestamp = new Date().getTime();
+                                _dmChannelMessagesMap[1] = {
+                                    timestamp: timestamp,
+                                    msg: messageInputValue,
+                                    sender: currentUser,
+                                }
+                                _dmChannelMsgIndexes.unshift(1);
+                                const messageString = sendDM(newChannel, currentUser, messageInputValue, 1, timestamp);
+                                const messageDm = {
+                                    messageString: messageString,
+                                    dmUser: dmUser.user,
+                                };
+                                chatSocket.emit("send_message_dm", messageDm);
+                                setDmChannelMessagesMap(_dmChannelMessagesMap);
+                                setDmChannelMsgIndexes(_dmChannelMsgIndexes);
+                                setMessageInputValue("");
+                                const _userDms = [...userDms];
+                                _userDms.push({
+                                    user: dmUser.user,
+                                    channel: newChannel,
+                                    isLoggedIn: dmUser.isLoggedIn,
+                                });
+                                setUserDms(_userDms);
+                                
+                                const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
+                                // const isSendChatMsgSuccess = false;
+                                
+                                console.log("send first message Success: " + isSendChatMsgSuccess);
+                                // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
+                                // const isSendChatMsgSuccess = true;
+                                if(isSendChatMsgSuccess){
+                                    increaseDmUserUnread();
+                                    console.log(`successfully sent first message to ${dmUser.user}`);
+                                   
+                                }
+                            }
+                            else {
+                                // display message unable to send message
+                            }
                         
-                        // send DM message
-                        let _dmChannelMessagesMap = {...dmChannelMessagesMap};
-                        let _dmChannelMsgIndexes = [0];
-                        const timestamp = new Date().getTime();
-                        _dmChannelMessagesMap[1] = {
-                            timestamp: timestamp,
-                            msg: messageInputValue,
-                            sender: currentUser,
+                        
                         }
-                        _dmChannelMsgIndexes.unshift(1);
-                        const messageString = sendDM(newChannel, currentUser, messageInputValue, 1, timestamp);
-                        const messageDm = {
-                            messageString: messageString,
-                            dmUser: dmUser.user,
-                        };
-                        chatSocket.emit("send_message_dm", messageDm);
-                        setDmChannelMessagesMap(_dmChannelMessagesMap);
-                        setDmChannelMsgIndexes(_dmChannelMsgIndexes);
-                        setMessageInputValue("");
-                        const _userDms = [...userDms];
-                        _userDms.push({
-                            user: dmUser.user,
-                            channel: newChannel,
-                            isLoggedIn: dmUser.isLoggedIn,
-                        });
-                        setUserDms(_userDms);
-                        // let _myMessages = {...myMessages};
-                        // _myMessages[newChannel] = {
-                        //     type: MessageType.DM,
-                        //     msgMap: {},
-                        //     msgList: [0],
-                        //     unread: 0,
-                        // };
-                        // const currentMessageIndex = myMessages[dmUser].msgList.length;
-                        // const timestamp = new Date().getTime();
-                       
-                        const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
-                        // const isSendChatMsgSuccess = true;
-                        console.log("send first message Success: " + isSendChatMsgSuccess);
-                        // const isSendChatMsgSuccess = sendChatTopicMessage(sendDM(newChannel, currentUser, messageInputValue, 1));
-                        // const isSendChatMsgSuccess = true;
-                        if(isSendChatMsgSuccess){
-                            console.log(`successfully sent first message to ${dmUser.user}`);
-                            // const currentMessageIndex = myMessages[dmUser].msgList.length;
-                            // _myMessages[newChannel].msgMap[1] = {
-                            //     timestamp: timestamp,
-                            //     msg: messageInputValue,
-                            //     sender: currentUser,
-                            // };
-                            // _myMessages[newChannel].msgList.unshift(1);
-                            // const messageDm = {
-                            //     messageString: messageString,
-                            //     dmUser: dmUser.user,
-                            // };
-                            // chatSocket.emit("send_message_dm", messageDm);
-                            // setMyMessages(_myMessages);
-                            // setMessageInputValue("");
-                        }
-                    }
-                    else {
-                        // display message unable to send message
-                    }
+                    });
+                    
+                    
                     
                 });
                 
@@ -340,12 +319,14 @@ const ChatWindow = (props) => {
                 setDmChannelMsgIndexes(_dmChannelMsgIndexes);
                 setMessageInputValue("");
                 // setMyMessages(_myMessages);
+                // gunDb.get(`hca-${dmUser.user}`).put({unreads:{(""+currentUser): 1}})
                 
                 // const isSendChatMsgSuccess = true;
                 const isSendChatMsgSuccess = await sendChatTopicMessage(messageString);
                 // console.log("dmUserExists: isSendChatMsgSuccess: ", isSendChatMsgSuccess);
 
                 if(isSendChatMsgSuccess){
+                    increaseDmUserUnread();
                     console.log("sendChatMsgSuccess to existing dmuser");
                 }
             }
@@ -354,6 +335,33 @@ const ChatWindow = (props) => {
 
     const onChangeMessageInput = (value) => {
         setMessageInputValue(value);
+    }
+
+    const increaseDmUserUnread = () => {
+        const gunDmUser = gunDb.get(`hca-${dmUser.user}`);
+        gunDmUser.get("unread").once((node) => {
+            if(node && 
+                node[currentUser] && 
+                typeof node[currentUser] === "number" &&
+                node[currentUser] >= 0
+            ){
+                console.log("increaseDmUserUnread exists: " + node[currentUser]);
+                const unread = parseInt(node[currentUser]) + 1;
+                gunDmUser.get("unread").get(currentUser).put(unread);
+            }else{
+                console.log("increaseDmUserUnread exists not");
+                gunDmUser.get("unread").get(currentUser).put(1);
+            }
+            gunDmUser.get("unread").once((node)=> {
+                console.log(`${dmUser.user} unreads after: `, node);
+            })
+            
+        });
+    }
+
+    const resetDmUserUnread = () => {
+        const gunDmUser = gunDb.get(`hca-${dmUser.user}`);
+        gunDmUser.get("unread").get(currentUser).put(0);
     }
 
     const sendDataTopicMessage = async (dataMessage: string) => {

@@ -12,6 +12,7 @@ import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import { UserAction, CHAT_SERVER_ENDPOINT} from './constants';
 // import socketIOClient from "socket.io-client";
 import io from "socket.io-client";
+// import Gun from 'gun';
 import AppContext from './AppContext';
 // import {
 //   setChannelIndex,
@@ -32,16 +33,28 @@ const ENDPOINT = "https://pacific-spire-35776.herokuapp.com/";
 // const DATA_TOPIC_ID = "0.0.34717180";
 let client = null;
 
+// const gun = Gun("localhost:3030/gun");
+// let hhgcaUsers = gun.get('hhgca-users').put({id: 0, word: "test"});
+// let bird = gun.get('turtle').put({type: 'turtle', weight: 3});
+// gun.get('animals').set(bird);
+// let animals = gun.get('animals');
+// let testPeople = gun.get("people");
+// gun.get('alice').put({name: 'alice', age: 520});
+// let testUser = gun.get('alice');
+// testPeople.set(testUser);
+// .put({name: 'alice', age: 420});
+
+// .put({name: 'alicia', age: 21});
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
 // const defaultWidth = "w-[" + WINDOW_WIDTH + "px]";
 // const defaultHeight = "w-[" + WINDOW_HEIGHT + "px]";
-console.log("App-WindowWidth: " + WINDOW_WIDTH);
+// console.log("App-WindowWidth: " + WINDOW_WIDTH);
 
 const App = () => {
   // const hederaClient = useSelector((state) => state.user.hederaClient);
   // const { currentUser, setHederaClient, userMap, setUserMap, userList, setUserList, dmChannelList, setDmChannelList, dmChannelMap, setDmChannelMap, groupChannelMap, groupChannelList, deletedChannelList, channelIndex, setChannelIndex} = useContext(AppContext);
-  const {setHederaClient, currentDmUser} = useContext(AppContext);
+  const {setHederaClient, currentDmUser, gunDb, gunHederaChatUsers} = useContext(AppContext);
   const [userMap, setUserMap] = useState({});
   const [userList, setUserList] = useState([]);
   // const [hederaClient, setHederaClient] = useState(null);
@@ -61,18 +74,6 @@ const App = () => {
   // const dispatch = useDispatch();
   // const [isLoggedIn, setLoggedIn] = useState(false);
   const [isNewAccountCreated, setNewAccountCreated] = useState(false);
-  // const [topicMsg, setTopicMsg] = useState("init");
-  // const [appUserList, setAppUserList] = useState([]);
-
-  // const currentUser = useSelector((state) => state.user.currentUser);
-  // const userList = useSelector((state) => state.users.userList);
-  // const userMap = useSelector((state) => state.users.userMap);
-  // const deletedChannelList = useSelector((state) => state.channels.deletedChannelList);
-  // const dmChannelMap = useSelector((state) => state.channels.dmChannelMap);
-  // const groupChannelMap = useSelector((state) => state.channels.groupChannelMap);
-  // const dmChannelList = useSelector((state) => state.channels.dmChannelList);
-  // const groupChannelList = useSelector((state) => state.channels.groupChannelList);
-  // const hederaClient = useSelector((state) => state.user.hederaClient);
   const handleResize = () => {
     console.log("handleResize");
     setWindowWidth("w-[" + window.screen.width + "px]");
@@ -80,12 +81,12 @@ const App = () => {
   }
   
   useEffect(() => {
-    console.log("window.screen: " + window.screen.width + ", " + window.screen.height);
+    // console.log("window.screen: " + window.screen.width + ", " + window.screen.height);
     window.addEventListener("resize", handleResize);
-    console.log("App-WindowWidth1: " + window.innerWidth + ", " + window.innerHeight);
+    // console.log("App-WindowWidth1: " + window.innerWidth + ", " + window.innerHeight);
     setWindowWidth("w-[" + (window.screen.width - 20) + "px]");
     setWindowHeight("h-[" + window.screen.height + "px]");
-    console.log("AppContext: ", currentUser);
+    // console.log("AppContext: ", currentUser);
     console.log("APP.JS useeffect");
 
     const myAccountId = process.env.REACT_APP_MY_ACCOUNT_ID;
@@ -188,13 +189,12 @@ const App = () => {
 
   }, []);
   
-  console.log("clientHeight: " + document.documentElement.clientHeight);
+  // console.log("clientHeight: " + document.documentElement.clientHeight);
   const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
   // const screenWidth = `w-[${window.screen.width}px]`;
   // const screenHeight = `w-[${window.screen.height}px]`;
   // ${defaultHeight}
   const mdWindowHeight = "md:" + windowHeight;
-  console.log("App-WindowWidth2: " + windowWidth);
   const mainViewWidth = !!currentUser ? "w-screen" : "w-[350px]";
   return (
     <div className={`flex flex-col bg-[black] w-screen h-screen md:h-[1200px]`}>

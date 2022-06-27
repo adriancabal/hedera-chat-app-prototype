@@ -9,7 +9,7 @@ import { TopicMessageSubmitTransaction } from "@hashgraph/sdk";
 import { loginUser, newUser } from '../helper/MessageMaker';
 import socketIOClient from "socket.io-client";
 import { CHAT_SERVER_ENDPOINT} from '../constants';
-import App from '../App';
+
 // import { userMap, userList } from '../data';
 // import SearchIcon from '@mui/icons-material/Search';
 // const hederaContractId = process.env.REACT_APP_HEDERA_CHAT_CONTRACT_ID;
@@ -22,7 +22,7 @@ const Login = (props) => {
     // const myMessages = props.myMessages;
     // console.log("Login: myMessages: ", myMessages);
     // const hederaClient = props.hederaClient;
-    const {dataSocket, setCurrentUser, hederaClient, setDmChannelList, chatSocket, setChatSocket, setMyMessages} = useContext(AppContext);
+    const {dataSocket, setCurrentUser, hederaClient, setDmChannelList, gunDb, gunHederaChatUsers} = useContext(AppContext);
     // const setCurrentUser = props.setCurrentUser;
     const userList = props.userList;
     const userMap = props.userMap;
@@ -48,7 +48,7 @@ const Login = (props) => {
 
     const onChangePasswordInput = (pw: string) => {
         setPasswordInputValue(pw);
-    }
+    } 
 
     const onClickSubmit = async() => {
         // alert("user: " + usernameInputValue +", pw: " + passwordInputValue );
@@ -77,34 +77,12 @@ const Login = (props) => {
             console.log("authenticate_response: ", response);
             setIsLoading(false);
             if(response.isAuthorized){
+                const gunUserKey = `hca-${usernameInputValue}`;
+                let gunUser = gunDb.get(gunUserKey).put({userid: usernameInputValue, isLoggedIn: true});
+                gunHederaChatUsers.set(gunUser);
                 setCurrentUser(usernameInputValue);
                 setErrorMessage("");
                 setDmChannelList(response.userDmChannels);
-                // const _chatSocket = socketIOClient(CHAT_SERVER_ENDPOINT, 
-                //     {
-                //     withCredentials: true, 
-                //     extraHeaders: {
-                //       "hedera-chat-message": "abcd",
-                //     }
-                //   }
-                // );
-                // setChatSocket(_chatSocket);
-                
-                // _chatSocket.on("get_init_msg_load_response", msgLoad => {
-                //     console.log("chatSocketMessageLoadResponse: ", msgLoad);
-                //     setMyMessages(msgLoad);
-                //     setCurrentUser(usernameInputValue);
-                //     setErrorMessage("");
-                //     setDmChannelList(response.userDmChannels);
-
-
-                // });
-                // const initialMsgLoadData = {
-                //     user: usernameInputValue,
-                //     channels: response.userDmChannels,
-                // };
-                // console.log("emit: get_init_msg_load: ", initialMsgLoadData);
-                // _chatSocket.emit("get_init_msg_load", initialMsgLoadData);
 
                 // dataSocket.removeAllListeners("authenticate");
                 if(!response.isCurrentlyLoggedIn){
@@ -199,6 +177,7 @@ const Login = (props) => {
             }
         });
         dataSocket.emit("isUsernameAvailable", usernameInputValue);
+
         // if(userMap[usernameInputValue]){
         //     return false;
         // }
@@ -235,19 +214,10 @@ const Login = (props) => {
         setIsLoading(false);
         if(createNewAccountSuccess){
             console.log("createNewAccountSuccess!");
-            // if(!userMap[usernameInputValue]){
-            //     console.log("new user doesn't exist in userMap");
-            //     // let userMapTemp = {...userMap};
-            //     userMap[usernameInputValue] = {
-            //         pw: passwordInputValue, 
-            //         channels: [],
-            //         isLoggedIn: false,
-            //     };
-            //     // let userListTemp = [...userList];
-            //     userList.push(usernameInputValue);
-            //     // dispatch(setUserMap(userMapTemp));
-            //     // dispatch(setUserList(userListTemp));
-            // }
+            const gunUserKey = `hca-${usernameInputValue}`;
+            gunDb.get(gunUserKey).put({userid: usernameInputValue, isLoggedIn: false});
+            let gunUser = gunDb.get(gunUserKey);
+            gunHederaChatUsers.set(gunUser);
             console.log("finalize createNewAccountSuccess");
             props.setNewAccountCreated(true);
             setLoginType("login");
@@ -276,6 +246,7 @@ const Login = (props) => {
     const onClickBottomLink = () => {
         console.log("onClickBottomLink-userMap: ", userMap);
         if(loginType === "login"){
+            
             setLoginType("create");
             props.setNewAccountCreated(false);
         }else {

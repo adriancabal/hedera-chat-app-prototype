@@ -5,9 +5,10 @@ import AppContext from "../../AppContext";
 import AddIcon from '@mui/icons-material/Add';
 import CircleIcon from '@mui/icons-material/Circle';
 const WINDOW_WIDTH = window.innerWidth;
+
 const SideBar = (props) => {
-    const {currentUser, dataSocket, userDms, setUserDms, myMessages, unreadMsgs, setUnreadMsgs, currentDmUser, setCurrentDmUser} = useContext(AppContext);
-    const {typingStatus} = useContext(AppContext);
+    const {currentUser, currentDmUser, dataSocket, userDms, setUserDms, myMessages, unreadMsgs, setUnreadMsgs, setCurrentDmUser} = useContext(AppContext);
+    const {typingStatus, gunDb, gunHederaChatUsers} = useContext(AppContext);
     const mainWindow = props.mainWindow;
     const setMainWindow = props.setMainWindow;
     console.log("Sidebar: myMessages: ", myMessages);
@@ -21,11 +22,71 @@ const SideBar = (props) => {
             // console.log("Sidebar: getDMUsers_response1: "+ response);
             console.log("Sidebar: getDMUsers_response: ", response);
             setUserDms(response);
+
+            // get unreads of dmUsers from gun and update it 
+            gunDb.get(`hca-${currentUser}`).get("unread").once((node)=>{
+                console.log("sideBarGunCurrentUser: ", node);
+                const unreads = node;
+                let _unreadMsgs = {...unreadMsgs}; 
+                let isUnreads = false;
+                for(let i=0;i<response.length; i++){
+                    if(typeof unreads[response[i].user] === "number" 
+                        && unreads[response[i].user] > 0) {
+                            _unreadMsgs[response[i].channel] = unreads[response[i].user];  
+                            isUnreads = true;
+                    }
+                }
+                if(isUnreads){
+                    setUnreadMsgs(_unreadMsgs);
+                }
+            });
+
+            // listen to changes in login status of all added users
+            for(let i=0;i<response.length; i++){
+                let userid = `hca-${response[i].user}`;
+                console.log(`userid${i}:` + userid);
+                let gunUser = gunDb.get(userid);
+                gunUser.on((node) => {
+                    let _userDms = [...response];
+                    const _userId = node.userid;
+                    const _isLoggedIn = node.isLoggedIn;
+                    for(let j=0; j<_userDms.length; j++){
+                        if(_userDms[j].user === _userId){
+                            _userDms[j].isLoggedIn = _isLoggedIn;
+                            if(currentDmUser && currentDmUser.user === _userId){
+                                setCurrentDmUser(_userDms[j]);
+                            }
+                            break;
+                        }
+                    }
+                    setUserDms(_userDms);
+                });
+            }
             
             // dataSocket.removeAllListeners("getDMUsers_response");
         });
         
     }, [currentUser]);
+
+    // useEffect(() => {
+    //     let gunUser = gunUsers.get("user2");
+
+    //     gunUser.on((node) => {
+    //         let _userDms = [...userDms];
+    //         const _userId = node.userId;
+    //         const _isLoggedIn = node.isLoggedIn;
+    //         for(let j=0; j<_userDms.length; j++){
+    //             if(_userDms[j].user === _userId){
+    //                 _userDms[j].isLoggedIn = _isLoggedIn;
+    //                 if(currentDmUser && currentDmUser.user === _userId){
+    //                     setCurrentDmUser(_userDms[j]);
+    //                 }
+    //                 break;
+    //             }
+    //         }
+    //         setUserDms(_userDms);
+    //     });
+    // }, [userDms])
 
     const onClickAddDM = () => {
         setCurrentDmUser(null);
@@ -48,7 +109,7 @@ const SideBar = (props) => {
 
     }
 
-    console.log("Sidebar-dmUserUnreadMsgs: " + unreadMsgs["user2"]);
+    // console.log("Sidebar-dmUserUnreadMsgs: " + unreadMsgs["user2"]);
     // const onClickDMAddmary
     const windowWidth = WINDOW_WIDTH;
     const windowWidthStyle = "w-[" + windowWidth + "px]";

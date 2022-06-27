@@ -3,7 +3,15 @@ import { UserAction } from "./constants";
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
 import socketIOClient from "socket.io-client";
 import { current } from "@reduxjs/toolkit";
+import Gun from 'gun';
 const ENDPOINT = "http://localhost:4001";
+// const gun = Gun({
+//     peers: [
+//         'http://localhost:3030/gun'
+//     ]
+// });
+const gun = Gun('https://still-wave-93003.herokuapp.com/gun');
+// const gun = Gun('http://localhost:3030/gun'); 
 
 const AppContext = createContext();
 
@@ -28,6 +36,8 @@ const AppContext = createContext();
     const [unreadMsgs, setUnreadMsgs]= useState({})
     const [currentDmUser, setCurrentDmUser] = useState({});
     const [typingStatus, setTypingStatus] = useState({});
+    const [gunDb, setGunDb] = useState(gun);
+    const [gunHederaChatUsers, setGunHederaChatUsers] = useState(gun.get('hederaChatAppUsers'));
 
     const resetCurrentDmMessages = () => {
         setCurrentDmMessages([]);
@@ -60,6 +70,8 @@ const AppContext = createContext();
                 userDms,
                 unreadMsgs,
                 typingStatus,
+                gunDb,
+                gunHederaChatUsers,
                 setCurrentUser,
                 setCurrentDmUser,
                 setCurrentDmMessages,
