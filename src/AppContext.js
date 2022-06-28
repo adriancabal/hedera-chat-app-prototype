@@ -5,14 +5,25 @@ import socketIOClient from "socket.io-client";
 import { current } from "@reduxjs/toolkit";
 import Gun from 'gun/gun';
 // const ENDPOINT = "http://localhost:4001";
+
+//PERSONAL GUN REPO SERVER
 // const gun = Gun({
 //     peers: [
 //         'https://still-wave-93003.herokuapp.com/gun'
 //     ]
 // });
+
+//CLONED ORIGINAL GUN REPO SERVER
+// const gun = Gun({
+//     peers: [
+//         'https://shrouded-retreat-54455.herokuapp.com/gun'
+//     ]
+// });
+
+// AKASH NETWORK HOSTED GUN SERVER
 const gun = Gun({
     peers: [
-        'https://shrouded-retreat-54455.herokuapp.com/gun'
+        'http://u9ec3kv9o5frbau739ef75tvt4.palmito.duckdns.org/gun'
     ]
 });
 
