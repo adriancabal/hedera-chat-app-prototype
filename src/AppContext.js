@@ -23,7 +23,7 @@ import Gun from 'gun/gun';
 // AKASH NETWORK HOSTED GUN SERVER
 const gun = Gun({
     peers: [
-        'http://u9ec3kv9o5frbau739ef75tvt4.palmito.duckdns.org/gun'
+        'http://u9ec3kv9o5frbau739ef75tvt4.palmito.duckdns.org:80/gun'
     ]
 });
 
