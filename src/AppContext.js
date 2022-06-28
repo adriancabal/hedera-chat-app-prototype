@@ -14,18 +14,18 @@ import Gun from 'gun/gun';
 // });
 
 //CLONED ORIGINAL GUN REPO SERVER
-// const gun = Gun({
-//     peers: [
-//         'https://shrouded-retreat-54455.herokuapp.com/gun'
-//     ]
-// });
-
-// AKASH NETWORK HOSTED GUN SERVER
 const gun = Gun({
     peers: [
-        'http://u9ec3kv9o5frbau739ef75tvt4.palmito.duckdns.org:80/gun'
+        'https://shrouded-retreat-54455.herokuapp.com/gun'
     ]
 });
+
+// AKASH NETWORK HOSTED GUN SERVER
+// const gun = Gun({
+//     peers: [
+//         'http://u9ec3kv9o5frbau739ef75tvt4.palmito.duckdns.org/gun'
+//     ]
+// });
 
 // const gun = Gun('https://still-wave-93003.herokuapp.com/gun');
 // const gun = Gun('http://localhost:3030/gun'); 
