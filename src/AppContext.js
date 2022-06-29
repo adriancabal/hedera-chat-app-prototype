@@ -16,6 +16,7 @@ import Gun from 'gun/gun';
 //CLONED ORIGINAL GUN REPO SERVER
 const gun = Gun({
     peers: [
+        'https://still-wave-93003.herokuapp.com/gun',
         'https://shrouded-retreat-54455.herokuapp.com/gun'
     ]
 });
