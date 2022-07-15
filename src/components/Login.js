@@ -36,7 +36,7 @@ const Login = (props) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const modalColor = loginType === "login" ? "bg-[blue]" : "bg-[green]";
+    const modalColor = loginType === "login" ? "bg-[transparent]" : "bg-[transparent]";
     const userIdText = loginType === "login" ? "username" : "set Username";
     const passwordText = loginType === "login" ? "password" : "set Password";
     const buttonColor = loginType === "login" ? "bg-[#03bafc]" : "bg-[#03fc7f]";
@@ -268,7 +268,7 @@ const Login = (props) => {
             {
             !isLoading &&
             <>
-                <p className='self-center text-3xl text-white mt-8'>
+                <p className='self-center text-3xl md:text-4xl text-white mt-8'>
                     {loginType === "login" ? "Login" : "New User"}
                 </p>
 
@@ -280,7 +280,7 @@ const Login = (props) => {
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-72 h-12 bg-white mt rounded'
                         type="text" 
                         name="name" 
                         placeholder={loginType === "login" ? "username" : "new username"}
@@ -299,7 +299,7 @@ const Login = (props) => {
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-72 h-12 bg-white mt rounded'
                         type={"password"}
                         name="name" 
                         placeholder={loginType === "login" ? "password" : "new password"}
@@ -319,7 +319,7 @@ const Login = (props) => {
 
                 {/* Submit Button */}
                 <button 
-                    className={`self-center ${buttonColor} h-10 w-48 mt-5 rounded-md`}
+                    className={`self-center ${buttonColor} h-10 w-64 md:w-72 mt-5 rounded-md`}
                     onClick={()=>{onClickSubmit()}}
                 
                 >
@@ -328,7 +328,7 @@ const Login = (props) => {
 
 
                 {/* Bottom Link suggestion */}
-                <div className='flex flex-row self-center mt-5 mr-6'>
+                <div className='flex flex-row md:text-xl self-center mt-8 '>
                     <p className='text-white'>
                         {loginType === "login" ? "New user?" : "Already have an existing account?"}
                     </p>

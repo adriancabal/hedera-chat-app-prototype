@@ -3,28 +3,23 @@
 // import { setUserList, setUserMap } from "./redux/usersSlice";
 // import { setDeletedChannelList, setDmChannelList, setGroupChannelList, setDmChannelMap, setGroupChannelMap } from "./redux/channelsSlice";
 import './App.css';
-// import { AppProvider } from "./AppContext";
-// import AppContext from "./AppContext";
 import Login from './components/Login';
 import MainChatScreen from './components/MainChatScreen';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { Client, PrivateKey, AccountId} from "@hashgraph/sdk";
-import { UserAction, CHAT_SERVER_ENDPOINT} from './constants';
-// import socketIOClient from "socket.io-client";
 import io from "socket.io-client";
-// import Gun from 'gun';
 import AppContext from './AppContext';
-// import {
-//   setChannelIndex,
-//   userMap, 
-//   userList, 
-//   dmChannelMap, 
-//   groupChannelMap, 
-//   dmChannelList, 
-//   groupChannelList, 
-//   deletedChannelList,
-//   channelIndex,
-// } from './data';
+
+// Particles Import
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
+import particlesOptions from "./particles2.json";
+// import logo from './logo.svg';
+
+// import blockchainVideo from './video/fireflies.mp4';
+// import blockchainVideo from './video/blockchain.mp4';
+// import blockchainVideo from './video/green_orb.mp4';
+
 // const ENDPOINT = "http://localhost:8787";
 // const ENDPOINT = "http://192.168.0.59:8880"; //for connect mobile device to desktop localhost
 // const ENDPOINT = "http://localhost:8880";
@@ -52,20 +47,13 @@ const WINDOW_HEIGHT = window.innerHeight;
 // console.log("App-WindowWidth: " + WINDOW_WIDTH);
 
 const App = () => {
+  
   // const hederaClient = useSelector((state) => state.user.hederaClient);
   // const { currentUser, setHederaClient, userMap, setUserMap, userList, setUserList, dmChannelList, setDmChannelList, dmChannelMap, setDmChannelMap, groupChannelMap, groupChannelList, deletedChannelList, channelIndex, setChannelIndex} = useContext(AppContext);
   const {setHederaClient, currentDmUser, gunDb, gunHederaChatUsers} = useContext(AppContext);
-  const [userMap, setUserMap] = useState({});
-  const [userList, setUserList] = useState([]);
   // const [hederaClient, setHederaClient] = useState(null);
   const { currentUser, setDataSocket} = useContext(AppContext);
   // const [currentUser, setCurrentUser] = useState("");
-  const  [dmChannelMap, setDmChannelMap] = useState({});
-  const [dmChannelList, setDmChannelList] = useState([]);
-  const [groupChannelMap, setGroupChannelMap] = useState({});
-  const [groupChannelList, setGroupChannelList] = useState([]);
-  const [channelIndex, setChannelIndex] = useState(0);
-  const [deletedChannelList, setDeletedChannelList] = useState([]);
   const [windowWidth, setWindowWidth] = useState(0);
   const [windowHeight, setWindowHeight] = useState(0);
   // const [myMessages, setMyMessages] = useState([]);
@@ -81,6 +69,9 @@ const App = () => {
   }
   
   useEffect(() => {
+    gunDb.get('hca-adrian').get('unread').once(node => {
+      console.log("hca-adrian-unread: ", node);
+    })
     // console.log("window.screen: " + window.screen.width + ", " + window.screen.height);
     window.addEventListener("resize", handleResize);
     // console.log("App-WindowWidth1: " + window.innerWidth + ", " + window.innerHeight);
@@ -196,16 +187,40 @@ const App = () => {
   // ${defaultHeight}
   const mdWindowHeight = "md:" + windowHeight;
   const mainViewWidth = !!currentUser ? "w-screen" : "w-[350px]";
+
+  // TS PARTICLES
+  // const particlesInit = async (main) => {
+  //   console.log(main);
+
+  //   // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
+  //   // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+  //   // starting from v2 you can add only the features you need reducing the bundle size
+  //   await loadFull(main);
+  // };
+
+
+  const particlesInit = useCallback(main => {
+    loadFull(main);
+  }, []);
+
   return (
-    <div className={`flex flex-col bg-[black] w-screen h-screen md:h-[1200px]`}>
+    // <div className={`flex flex-col bg-[black] w-screen h-screen md:h-[1200px]`}>
+      <div className={`flex flex-col w-screen h-screen md:h-[1200px]`}>
+      {/* <div className={`App`}> */}
+      {/* <video autoPlay loop muted id='video' className={`flex grow `}> */}
+        {/* <video autoPlay loop muted id='video' >
+          <source src={blockchainVideo}  type={'video/mp4'}/>
+        </video> */}
+        <Particles options={particlesOptions} init={particlesInit} />
+
       { ((currentDmUser && Object.keys(currentDmUser).length === 0)
         || (currentDmUser && Object.keys(currentDmUser).length > 0 && window.innerWidth >= 640)) &&
-        <div className={`flex flex-col mt-8 sm:mt-16 sm:mb-16 mb-8 h-20 justify-center bg-[black]`}>
-          <p className="text-center text-white text-2xl md:text-4xl">
-            Chat App Prototype
+        <div className={`flex flex-col mt-8 sm:mt-16 sm:mb-16 mb-8 h-20 justify-center `}>
+          <p className="text-center text-white text-4xl md:text-7xl">
+            Hash Chat
           </p>
-          <p className="text-center text-white text-sm md:text-md mt-2">
-            powered by Hedera Hashgraph
+          <p className="text-center text-white text-md md:text-2xl mt-2">
+            runs on Hedera Hashgraph
           </p>
         </div>
       }

@@ -1,12 +1,12 @@
 .App {
-  /* text-align: center; */
-  height: "100vh";
+  text-align: center;
+  /* height: "100vh"; */
   /* width: "100%" !important; */
 }
 
 .App-logo {
-  height: 20vmin;
-  /* height: 40vmin; */
+  /* height: 20vmin; */
+  height: 40vmin;
   pointer-events: none;
 }
 
@@ -17,7 +17,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  /* background-color: #282c34; */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -25,6 +25,8 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  /* z-index: 1; */
+
 }
 
 .App-link {
@@ -124,4 +126,18 @@
   display: flex;
   width: 30px;
   height: 20px;
+}
+
+/* SOLUTION to video background scaling and fitting full screen view and maintain aspect ratio */
+/* https://stackoverflow.com/questions/66026657/how-can-i-make-my-background-video-full-screen-in-react */
+/* https://css-tricks.com/full-page-background-video-styles/ */
+/* https://medium.com/@infinitysanctum8/how-to-add-a-video-background-in-react-js-8c31e0bc4f42 */
+#video {
+  position: fixed;
+  z-index: -1;
+  object-fit: cover;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
 }
