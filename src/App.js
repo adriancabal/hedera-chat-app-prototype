@@ -11,13 +11,13 @@ import io from "socket.io-client";
 import AppContext from './AppContext';
 
 // Particles Import
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
-import particlesOptions from "./particles2.json";
+// import Particles from "react-tsparticles";
+// import { loadFull } from "tsparticles";
+// import particlesOptions from "./particles2.json";
 // import logo from './logo.svg';
 
 // import blockchainVideo from './video/fireflies.mp4';
-// import blockchainVideo from './video/blockchain.mp4';
+import blockchainVideo from './video/neon_particles.MP4';
 // import blockchainVideo from './video/green_orb.mp4';
 
 // const ENDPOINT = "http://localhost:8787";
@@ -181,7 +181,7 @@ const App = () => {
   }, []);
   
   // console.log("clientHeight: " + document.documentElement.clientHeight);
-  const bodyMarginTop = currentUser ? "mt-0" : "mt-16";
+  const bodyMarginTop = currentUser ? "mt-0" : "mt-16 md:mt-0";
   // const screenWidth = `w-[${window.screen.width}px]`;
   // const screenHeight = `w-[${window.screen.height}px]`;
   // ${defaultHeight}
@@ -199,27 +199,25 @@ const App = () => {
   // };
 
 
-  const particlesInit = useCallback(main => {
-    loadFull(main);
-  }, []);
+  // const particlesInit = useCallback(main => {
+  //   loadFull(main);
+  // }, []);
 
   return (
     // <div className={`flex flex-col bg-[black] w-screen h-screen md:h-[1200px]`}>
-      <div className={`flex flex-col w-screen h-screen md:h-[1200px]`}>
-      {/* <div className={`App`}> */}
-      {/* <video autoPlay loop muted id='video' className={`flex grow `}> */}
-        {/* <video autoPlay loop muted id='video' >
+    <div className={`flex flex-col w-screen h-screen md:h-[1200px]`}>
+        <video  class="lazy" autoPlay loop muted playsInline id='video' >
           <source src={blockchainVideo}  type={'video/mp4'}/>
-        </video> */}
-        <Particles options={particlesOptions} init={particlesInit} />
+        </video>
+        {/* <Particles options={particlesOptions} init={particlesInit} /> */}
 
       { ((currentDmUser && Object.keys(currentDmUser).length === 0)
         || (currentDmUser && Object.keys(currentDmUser).length > 0 && window.innerWidth >= 640)) &&
-        <div className={`flex flex-col mt-8 sm:mt-16 sm:mb-16 mb-8 h-20 justify-center `}>
-          <p className="text-center text-white text-4xl md:text-7xl">
+        <div className={`flex flex-col mt-8 sm:mt-16 sm:mb-16 mb-0 h-20 justify-center `}>
+          <p className="text-center text-white text-4xl md:text-6xl">
             Hash Chat
           </p>
-          <p className="text-center text-white text-md md:text-2xl mt-2">
+          <p className="text-center text-white text-md md:text-xl mt-2">
             runs on Hedera Hashgraph
           </p>
         </div>
@@ -237,29 +235,6 @@ const App = () => {
         }
       </div>
     </div>
-      // <div className={`flex flex-col md:w-screen w-screen max-w-[414px] bg-black h-screen md:h-screen `}>
-      //   <div className={`flex flex-col mt-8 md:mt-16 md:mb-16 mb-8 h-20 justify-center bg-[black]`}>
-      //     <p className="text-center text-white text-2xl md:text-4xl">
-      //       Chat App Prototype
-      //     </p>
-      //     <p className="text-center text-white text-sm md:text-md mt-2">
-      //       powered by Hedera Hashgraph
-      //     </p>
-      //   </div>
-      //   {/* <p className='text-[white] text-3xl text-center'>{topicMsg}</p> */}
-      //   {
-      //     !!!currentUser && isNewAccountCreated &&
-      //     <p className='text-[#03fc6f] font-bold text-3xl text-center'>Account Created Successfully!</p>
-      //   }
-      //   <div className={`flex flex-1 ${bodyMarginTop} justify-center ${defaultHeight} md:h-[700px] md:w-[1000px] w-[414px] bg-[black] self-center max-w-[390px]`}>
-          
-      //     { 
-      //       !!currentUser 
-      //       ? <MainChatScreen />
-      //       : <Login setNewAccountCreated={setNewAccountCreated}/>
-      //     }
-      //   </div>
-      // </div>
   );
 }
 

@@ -260,7 +260,7 @@ const Login = (props) => {
     // const defaultWidth = "w-[" + 350 + "px]";
 
     return (
-        <div className={`flex flex-col w-[350px] ${modalColor} h-96 w-96 rounded-xl`}>
+        <div className={`flex flex-col w-[350px] ${modalColor} h-100 w-96 rounded-xl`}>
             {   isLoading &&
                 <img src={logo} className="App-logo" alt="logo" />
             }
@@ -273,14 +273,14 @@ const Login = (props) => {
                 </p>
 
                 {/* username */}
-                <div className='flex flex-row self-center mt-8'>
+                <div className='flex flex-row self-center mt-12'>
                     {/* <div className='flex flex-col  justify-center mr-3'>
                         <p className='text-white'>{userIdText}</p>
                     </div> */}
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 md:w-72 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-64 h-12 bg-white mt rounded'
                         type="text" 
                         name="name" 
                         placeholder={loginType === "login" ? "username" : "new username"}
@@ -299,7 +299,7 @@ const Login = (props) => {
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 md:w-72 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-64 h-12 bg-white mt rounded'
                         type={"password"}
                         name="name" 
                         placeholder={loginType === "login" ? "password" : "new password"}
@@ -319,7 +319,7 @@ const Login = (props) => {
 
                 {/* Submit Button */}
                 <button 
-                    className={`self-center ${buttonColor} h-10 w-64 md:w-72 mt-5 rounded-md`}
+                    className={`self-center ${buttonColor} h-10 w-64 md:w-64 mt-5 rounded-md`}
                     onClick={()=>{onClickSubmit()}}
                 
                 >
