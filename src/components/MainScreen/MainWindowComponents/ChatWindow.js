@@ -1,7 +1,9 @@
 import { useState, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import SendIcon from '@mui/icons-material/Send';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CircleIcon from '@mui/icons-material/Circle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import Lottie from "lottie-react";
 // import loadingAnimation from "../../../animations/loading.json";
@@ -38,6 +40,8 @@ const ChatWindow = (props) => {
     const [isTyping, setIsTyping] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const messageInputBox = useRef(null);
+    const [selectedFiles , setSelectedFiles] = useState([]);
+    const hiddenFileInput = useRef(null); 
 
     useEffect(() => {
         console.log("ChatWindow useeffect - dmUser: " + dmUser.user);
@@ -436,6 +440,37 @@ const ChatWindow = (props) => {
         setCurrentDmUser({});
     }
 
+    const attachFileIconClicked = (event) => {
+        hiddenFileInput.current.click();
+    }
+
+    const handleChange = (event) => {
+        const imgURL = URL.createObjectURL(event.target.files[0]);
+        // alert("imageFileUrl: " + imgURL);
+        let selectedFile = event.target.files[0];
+        console.log("selectedFile:", event.target.files[0]);
+        const fileContainer = {
+            file: event.target.files[0],
+            imgUrl: imgURL,
+            name: event.target.files[0].name,
+        };
+        let currentSelectedFiles = [...selectedFiles];
+        currentSelectedFiles.push(fileContainer);
+        console.log("currentSelectedFiles:", currentSelectedFiles);
+        event.target.value = null;
+        setSelectedFiles(currentSelectedFiles);
+        
+    };
+
+    const cancelFileUpload = (index) => {
+        console.log("removed index: " + index);
+        const currentSelectedFiles = [...selectedFiles];
+        console.log("beforeSplice: ", currentSelectedFiles);
+        currentSelectedFiles.splice(index, 1);
+        console.log("afterSplice: ", currentSelectedFiles);
+        setSelectedFiles(currentSelectedFiles);
+    }
+
     // console.log("ChatWindow-myMessages: ", myMessages[1]);
     console.log("$isTyping: " + isTyping);
     // const windowWidth2 = windowWidth/2;
@@ -446,7 +481,7 @@ const ChatWindow = (props) => {
     const defaultWidth = "w-[" + WINDOW_WIDTH + "px]";
     const defaultMsgWidthStyle = `w-[${defaultMsgWidth}px]`;
     // const defaultWidth = "w-full";
-
+    console.log("selectedFiles:", selectedFiles);
     return (
         <div className={`flex flex-1 flex-col sm:w-full  sm:h-[300px] w-screen h-[100px]`}>
             <div className={`flex flex-row sm:w-full w-screen h-12 bg-[#343d33]  border-y-[1px] border-[gray]`} >
@@ -482,7 +517,7 @@ const ChatWindow = (props) => {
                             let myMessage = dmChannelMessagesMap[messageIndex];
                             if(messageIndex === 0){
                                 myMessage = {
-                                msg: `# Beginning of your chat with ${dmUser.user} `,
+                                 msg: `# Beginning of your chat with ${dmUser.user} `,
                                 } ;
                             }
                             console.log("myMessage: ", myMessage);
@@ -555,27 +590,77 @@ const ChatWindow = (props) => {
                         <p className="ml-3">{`${dmUser.user} typing...`}</p>
                     </div>
                 }
-
-                <div className={`flex flex-row sm:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2 mt-2 justify-end`}>
-                    <input
-                        autoComplete={"off"}
-                        className="h-12 grow self-center rounded-md bg-[#343d33] pl-2 text-white"
-                        type="text" 
-                        name="send-message" 
-                        placeholder={"write a message"}
-                        value={messageInputValue}
-                        onChange={e => {
-                            onChangeMessageInput(e.target.value);
-                        }}
-                        onKeyDownCapture={onKeyDownHandler}
-                        ref={messageInputBox}
-                    />
-                    <div 
-                        className={`flex text-white w-12 h-10 self-center justify-center ${sendButtonHoverCursor} ${sendButtonBgColor}`}
-                        onClick={() => onClickSend() }
-                    >
-                        <SendIcon className='self-center'/>
+                <div className='flex flex-col mt-2 '>
+                    {selectedFiles.length > 0 &&
+                        <>
+                        <div className='h-8 w-full bg-[#5e6e5c]'>
+                            <p className='text-white ml-2'>Attached files:</p>
+                        </div>
+                        <div className='scrollbar-dark-gray-horizontal bg-[#5e6e5c]'>
+                            <div className='flex flex-row h-[100px] align-center'>
+                                {selectedFiles.map((fileContainer, index) => {
+                                    return (
+                                        <div className='h-[80px] w-[80px] self-center mx-2 bg-[white] rounded-md '>
+                                            
+                                            <img 
+                                                src={fileContainer.imgUrl}
+                                                style={{height: 80, width: 80, borderRadius: 6, borderWidth: 2, borderColor: "black"}}
+                                                // src={`https://arweave.net/${imageId}`}
+                                                // src="https://arweave.net/OhYq0oFl-2JP5M7cr4NtbkwzqCccIe27qVJDbROr26E"
+                                                alt="img"
+                                            />
+                                            <CancelIcon 
+                                                senior
+                                                sx={{fontSize: 24, height:  24, color: "white", position: "relative", top: -90, left: 65, borderRadius: 6, cursor: "pointer"}}  
+                                                className="self-center bg-[#343d33]"  
+                                                onClick={() => cancelFileUpload(index)}
+                                            />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                        </>
+                    }
+                    <div className={`flex flex-row sm:w-full ${defaultWidth} h-[80px] bg-[#5e6e5c] rounded-xl pl-2  justify-end`}>
+                        <input
+                            autoComplete={"off"}
+                            className="h-12 grow self-center rounded-l-md bg-[#343d33] pl-2 text-white"
+                            type="text" 
+                            name="send-message" 
+                            placeholder={"write a message"}
+                            value={messageInputValue}
+                            onChange={e => {
+                                onChangeMessageInput(e.target.value);
+                            }}
+                            onKeyDownCapture={onKeyDownHandler}
+                            ref={messageInputBox}
+                        />
+                        <div 
+                            className='self-center rounded-r-md px-3 bg-[#343d33] hover:cursor-pointer'
+                        >
+                            <AttachFileIcon 
+                                sx={{ fontSize: 30, height:  48, borderTopRightRadius: 6, borderBottomRightRadius: 6, color: "white"}}  
+                                className="self-center bg-[#343d33]"  
+                                onClick={attachFileIconClicked}
+                            />
+                            <input
+                                type="file"
+                                ref={hiddenFileInput}
+                                onChange={handleChange}
+                                style={{display: 'none'}}
+                            />
+                    
+                        </div>
+                        
+                        <div 
+                            className={`flex text-white w-12 h-10 self-center justify-center hover:cursor-pointer ${sendButtonHoverCursor} ${sendButtonBgColor}`}
+                            onClick={() => onClickSend() }
+                        >
+                            <SendIcon className='self-center'/>
+                        </div>
                     </div>
+                    
                 </div>
                 </>
             }

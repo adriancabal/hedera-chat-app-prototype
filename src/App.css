@@ -102,6 +102,32 @@
   border-right:3px solid transparent;
   border-left:3px solid transparent;
 }
+
+/* scrollbar dark gray horizontal*/
+.scrollbar-dark-gray-horizontal {
+  display: flex;
+  /* display: block; */
+  /* width: 10em; */
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+.scrollbar-dark-gray-horizontal::-webkit-scrollbar {
+  /* width: 4px; */
+  height: 14px;
+  background-color: black;
+  border-top: 2px solid black;
+}
+.scrollbar-dark-gray-horizontal::-webkit-scrollbar-thumb {
+  height: 5px;
+  border-radius: 6px;
+  background: #aaa;
+  max-width: 10px;
+  padding: 2px;
+  background-clip: padding-box;
+  border-bottom:5px solid transparent;
+  border-top:5px solid transparent;
+}
+
 .search-dm-input-text {
   color: white;
 }

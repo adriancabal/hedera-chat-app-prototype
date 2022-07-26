@@ -280,7 +280,7 @@ const Login = (props) => {
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 md:w-64 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-64 h-12 bg-white mt rounded pl-3'
                         type="text" 
                         name="name" 
                         placeholder={loginType === "login" ? "username" : "new username"}
@@ -292,14 +292,14 @@ const Login = (props) => {
                 </div>
 
                 {/* password */}
-                <div className='flex flex-row self-center mt-8 mb-5'>
+                <div className='flex flex-row self-center mt-8 mb-5 '>
                     {/* <div className='flex flex-col  justify-center mr-3'>
                         <p className='text-white'>{passwordText}</p>
                     </div> */}
                     
                     <input
                         autoComplete={"off"}
-                        className=' w-64 md:w-64 h-12 bg-white mt rounded'
+                        className=' w-64 md:w-64 h-12 bg-white mt rounded pl-3'
                         type={"password"}
                         name="name" 
                         placeholder={loginType === "login" ? "password" : "new password"}
